@@ -35,6 +35,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
             else{
                 switch($args[0]){
                     case "create":
+                    case "c":
                         if($sender instanceof Player){
                             if(isset($args[1])){
                                 if(!isset($this->mines[$args[1]])){
@@ -58,6 +59,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                         }
                         break;
                     case "set":
+                    case "s":
                         if(isset($args[1])){
                             if(isset($args[3])){
                                 if (isset($this->mines[$args[1]])) {
@@ -89,6 +91,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                         }
                         break;
                     case "reset":
+                    case "r":
                         if(isset($args[1])){
                             if(isset($this->mines[$args[1]])){
                                 if($this->mines[$args[1]]->isMineSet()){
@@ -112,6 +115,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                         }
                         break;
                     case "longreset":
+                    case "lr":
                         if(isset($args[1])){
                             if(isset($this->mines[$args[1]])){
                                 if($this->mines[$args[1]]->isMineSet()){
