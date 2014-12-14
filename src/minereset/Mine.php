@@ -40,7 +40,7 @@ class Mine{
         for ($l = 1; $l < count($m); $l++) $sum[$l] = $sum[$l - 1] + $m[$l];
         foreach ($this->base->getServer()->getOnlinePlayers() as $p) {
             if ($p->getX() >= $this->getA()->getX() && $p->getX() <= $this->getB()->getX() && $p->getY() >= $this->getA()->getY() && $p->getY() <= $this->getB()->getY() && $p->getZ() >= $this->getA()->getZ() && $p->getZ() <= $this->getB()->getZ()){
-                $p->teleport($this->getLev()->getSpawn());
+                $p->teleport($this->getLev()->getSpawnLocation());
                 $p->sendMessage("You have been saved from suffocation.");
             }
         }

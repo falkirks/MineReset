@@ -8,6 +8,7 @@ use pocketmine\block\Block;
 use pocketmine\math\Vector3;
 use pocketmine\plugin\Plugin;
 use pocketmine\scheduler\PluginTask;
+use pocketmine\Server;
 
 class LongReset extends PluginTask{
     public $mines;
@@ -37,6 +38,9 @@ class LongReset extends PluginTask{
             }
             array_shift($this->mines);
         }
+        else{
+            $this->getOwner()->getServer()->getScheduler()->cancelTask($this->getTaskId());
+        }
     }
     public function scheduleLongReset(Mine $mine){
         $id = array_keys($mine->getData());
@@ -44,5 +48,6 @@ class LongReset extends PluginTask{
         $sum[0] = $m[0];
         for ($l = 1; $l < count($m); $l++) $sum[$l] = $sum[$l - 1] + $m[$l];
         $this->mines[] = [$mine->getA(), $mine->getB(), $mine->getLev(), $sum, $id, $mine->getA()->getY()];
+        $this->getOwner()->getServer()->getScheduler()->scheduleRepeatingTask($this, 2);
     }
 }
