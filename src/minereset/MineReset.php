@@ -19,7 +19,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
     public $mines;
     public function onEnable(){
         @mkdir($this->getDataFolder());
-        $this->minesData = new Config($this->getDataFolder() . "mines.yml", Config::YAML, []);
+        $this->mineData = new Config($this->getDataFolder() . "mines.yml", Config::YAML, []);
         $this->mines = [];
         $this->parseMines();
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
@@ -149,7 +149,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                 $this->mines[$this->sessions[$event->getPlayer()->getName()][0]] = new Mine($this, new Vector3(min($a->getX(), $b->getX()), min($a->getY(), $b->getY()), min($a->getZ(), $b->getZ())), new Vector3(max($a->getX(), $b->getX()), max($a->getY(), $b->getY()), max($a->getZ(), $b->getZ())), $b->getLevel());
                 $event->getPlayer()->sendMessage("Mine created.");
                 unset($this->sessions[$event->getPlayer()->getName()]);
-                $this->sessionsaveConfig();
+                $this->saveConfig();
             }
             else{
                 $this->sessions[$event->getPlayer()->getName()][1] = new Vector3($event->getBlock()->getX(), $event->getBlock()->getY(), $event->getBlock()->getZ());
