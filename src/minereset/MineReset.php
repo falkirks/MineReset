@@ -62,6 +62,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             if(isset($args[3])){
                                 if (isset($this->mines[$args[1]])) {
                                     $sets = array_slice($args, 2);
+                                    $save = [];
                                     foreach ($sets as $key => $item) {
                                         if ( $key & 1 ) {
                                             $save[$sets[$key-1]] = $item;
@@ -69,7 +70,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                                     }
                                     $this->mines[$args[1]]->setData($save);
                                     $sender->sendMessage("Mine setted.");
-                                    $this->sessionsaveConfig();
+                                    $this->saveConfig();
                                     return true;
                                 }
                                 else{
