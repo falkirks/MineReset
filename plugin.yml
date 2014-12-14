@@ -1,0 +1,26 @@
+name: MineReset
+main: minereset\MineReset
+version: 1.0.0
+author: Falk
+api: [1.0.0]
+load: POSTWORLD
+commands:
+ mine:
+  description: MineReset command
+  usage: /mine <create <name> / set <name> <contents> / reset <name> / longreset <name> >
+permissions:
+ minereset:
+  default: op
+  children:
+   minereset.command:
+    default: op
+    description: Use MineReset commands
+    children:
+     minereset.command.create:
+      description: Add new Mines
+     minereset.command.set:
+      description: Set existing mines
+     minereset.command.reset:
+      description: Reset mines
+     minereset.command.longreset:
+      description: Use tick seperated reset
