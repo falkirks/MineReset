@@ -13,13 +13,14 @@ class MineResetTask extends AsyncTask{
     private $b;
     private $ratioData;
     private $levelId;
-    public function __construct(array $chunks, Vector3 $a, Vector3 $b, array $data, $levelId, $regionId){
+    public function __construct(array $chunks, Vector3 $a, Vector3 $b, array $data, $levelId, $regionId, $chunkClass){
         $this->chunks = serialize($chunks);
         $this->a = $a;
         $this->b = $b;
         $this->ratioData = serialize($data);
         $this->levelId = $levelId;
         $this->regionId = $regionId;
+        $this->chunkClass = $chunkClass;
     }
     /**
      * Actions to execute when run
@@ -27,8 +28,13 @@ class MineResetTask extends AsyncTask{
      * @return void
      */
     public function onRun(){
+
+        $chunkClass = $this->chunkClass;
         /** @var  Chunk[] $chunks */
         $chunks = unserialize($this->chunks);
+        foreach($chunks as $hash => $binary){
+            $chunks[$hash] = $chunkClass::fromBinary($binary);
+        }
         $sum = [];
         $id = array_keys(unserialize($this->ratioData));
         $m = array_values(unserialize($this->ratioData));
@@ -41,7 +47,7 @@ class MineResetTask extends AsyncTask{
                     $a = rand(0, end($sum));
                     for ($l = 0; $l < count($sum); $l++) {
                         if ($a <= $sum[$l]) {
-                            $chunks[Level::chunkHash($x >> 4, $z >> 4)]->setBlockId($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l] & 0xff);
+                            $chunks[Level::chunkHash($x >> 4, $z >> 4)]->setBlock($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l] & 0xff, 0);
                             $l = count($sum);
                         }
                     }

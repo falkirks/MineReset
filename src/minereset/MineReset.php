@@ -60,6 +60,25 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             return true;
                         }
                         break;
+                    case "destroy":
+                    case "d":
+                        if(isset($args[1])){
+                            if(isset($this->mines[$args[1]])){
+                                unset($this->mines[$args[1]]);
+                                $this->saveConfig();
+                                $sender->sendMessage($args[1] . " has been destroyed.");
+                                return true;
+                            }
+                            else{
+                                $sender->sendMessage("That mine doesn't exist.");
+                                return true;
+                            }
+                        }
+                        else{
+                            $sender->sendMessage("You must specify a name.");
+                            return true;
+                        }
+                        break;
                     case "set":
                     case "s":
                         if(isset($args[1])){
@@ -98,7 +117,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             if(isset($this->mines[$args[1]])){
                                 if($this->mines[$args[1]]->isMineSet()){
                                     $this->mines[$args[1]]->resetMine();
-                                    $sender->sendMessage("Mine has been reset.");
+                                    $sender->sendMessage("Mine is now resetting.");
                                     return true;
                                 }
                                 else{
@@ -162,7 +181,9 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
             }
         }
     }
-
+    public function scheduleReset(MineResetTask $mineResetTask){
+        $this->getServer()->getScheduler()->scheduleAsyncTask($mineResetTask);
+    }
     /**
      * @return RegionBlocker
      */
