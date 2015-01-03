@@ -8,6 +8,7 @@ commands:
  mine:
   description: MineReset command
   usage: /mine < create <name> / set <name> <contents> / reset <name> >
+
 permissions:
  minereset:
   default: op
