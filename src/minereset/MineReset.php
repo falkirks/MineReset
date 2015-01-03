@@ -12,18 +12,20 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 
 class MineReset extends PluginBase implements CommandExecutor, Listener{
-    public $sessions, $longReset;
+    public $sessions;
     /** @var  Config */
     public $mineData;
     /** @var  Mine[] */
     public $mines;
+    /** @var  RegionBlocker */
+    private $regionBlocker;
     public function onEnable(){
         @mkdir($this->getDataFolder());
         $this->mineData = new Config($this->getDataFolder() . "mines.yml", Config::YAML, []);
         $this->mines = [];
         $this->parseMines();
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
-        $this->longReset = new LongReset($this);
+        $this->regionBlocker = new RegionBlocker($this);
         $this->sessions = [];
     }
     public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
@@ -116,27 +118,8 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                         break;
                     case "longreset":
                     case "lr":
-                        if(isset($args[1])){
-                            if(isset($this->mines[$args[1]])){
-                                if($this->mines[$args[1]]->isMineSet()){
-                                    $this->mines[$args[1]]->longReset();
-                                    $sender->sendMessage("Mine is resetting...");
-                                    return true;
-                                }
-                                else{
-                                    $sender->sendMessage("Mine has not been set.");
-                                    return true;
-                                }
-                            }
-                            else{
-                                $sender->sendMessage("Mine doesn't exist.");
-                                return true;
-                            }
-                        }
-                        else{
-                            $sender->sendMessage("You need to specify a name.");
-                            return true;
-                        }
+                        $sender->sendMessage("Long resetting is no longer supported, if you need it use an older version.");
+                        return true;
                         break;
                 }
             }
@@ -145,6 +128,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
             $sender->sendMessage("You must specify the action to perform.");
             return true;
         }
+        return false;
     }
     public function onBlockTap(PlayerInteractEvent $event){
         if(isset($this->sessions[$event->getPlayer()->getName()])){
@@ -164,7 +148,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
     }
     public function saveConfig(){
         foreach($this->mines as $n => $mine){
-            $this->mineData->set($n, [$mine->getA()->getX(), $mine->getB()->getX(), $mine->getA()->getY(), $mine->getB()->getY(), $mine->getA()->getZ(), $mine->getB()->getZ(), (count($mine->getData()) > 0 ? $mine->getData() : false) , $mine->getLev()->getName()]);
+            $this->mineData->set($n, [$mine->getA()->getX(), $mine->getB()->getX(), $mine->getA()->getY(), $mine->getB()->getY(), $mine->getA()->getZ(), $mine->getB()->getZ(), (count($mine->getData()) > 0 ? $mine->getData() : false) , $mine->getLevel()->getName()]);
         }
         $this->mineData->save();
     }
@@ -178,4 +162,13 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
             }
         }
     }
+
+    /**
+     * @return RegionBlocker
+     */
+    public function getRegionBlocker(){
+        return $this->regionBlocker;
+    }
+
+
 }

@@ -1,13 +1,13 @@
 name: MineReset
 main: minereset\MineReset
-version: 1.0.1
+version: 2.0
 author: Falk
 api: [1.0.0]
 load: POSTWORLD
 commands:
  mine:
   description: MineReset command
-  usage: /mine <create <name> / set <name> <contents> / reset <name> / longreset <name> >
+  usage: /mine < create <name> / set <name> <contents> / reset <name> >
 permissions:
  minereset:
   default: op

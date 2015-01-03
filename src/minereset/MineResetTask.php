@@ -1,0 +1,67 @@
+<?php
+namespace minereset;
+
+use pocketmine\level\format\Chunk;
+use pocketmine\level\Level;
+use pocketmine\math\Vector3;
+use pocketmine\scheduler\AsyncTask;
+use pocketmine\Server;
+
+class MineResetTask extends AsyncTask{
+    private $chunks;
+    private $a;
+    private $b;
+    private $ratioData;
+    private $levelId;
+    public function __construct(array $chunks, Vector3 $a, Vector3 $b, array $data, $levelId, $regionId){
+        $this->chunks = serialize($chunks);
+        $this->a = $a;
+        $this->b = $b;
+        $this->ratioData = serialize($data);
+        $this->levelId = $levelId;
+        $this->regionId = $regionId;
+    }
+    /**
+     * Actions to execute when run
+     *
+     * @return void
+     */
+    public function onRun(){
+        /** @var  Chunk[] $chunks */
+        $chunks = unserialize($this->chunks);
+        $sum = [];
+        $id = array_keys(unserialize($this->ratioData));
+        $m = array_values(unserialize($this->ratioData));
+        $sum[0] = $m[0];
+        for ($l = 1; $l < count($m); $l++) $sum[$l] = $sum[$l - 1] + $m[$l];
+
+        for ($x = $this->a->getX(); $x <= $this->b->getX(); $x++) {
+            for ($y = $this->a->getY(); $y <= $this->b->getY(); $y++) {
+                for ($z = $this->a->getZ(); $z <= $this->b->getZ(); $z++) {
+                    $a = rand(0, end($sum));
+                    for ($l = 0; $l < count($sum); $l++) {
+                        if ($a <= $sum[$l]) {
+                            $chunks[Level::chunkHash($x >> 4, $z >> 4)]->setBlockId($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l] & 0xff);
+                            $l = count($sum);
+                        }
+                    }
+                }
+            }
+        }
+        $this->setResult($chunks);
+    }
+    public function onCompletion(Server $server){
+        $chunks = $this->getResult();
+        $plugin = $server->getPluginManager()->getPlugin("MineReset");
+        if($plugin instanceof MineReset and $plugin->isEnabled()) {
+            $level = $server->getLevel($this->levelId);
+            if ($level != null) {
+                foreach ($chunks as $hash => $chunk) {
+                    Level::getXZ($hash, $x, $z);
+                    $level->setChunk($x, $z, $chunk);
+                }
+            }
+            $plugin->getRegionBlocker()->freeZone($this->regionId, $this->levelId);
+        }
+    }
+}
