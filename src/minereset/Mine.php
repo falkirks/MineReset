@@ -37,11 +37,11 @@ class Mine{
     }
     public function resetMine(){
         $chunks = [];
-        for ($x = $this->getA()->getX(); $x <= $this->getB()->getX(); $x += 15) {
-            for ($z = $this->getA()->getZ(); $z <= $this->getB()->getZ(); $z += 15) {
-                $chunk = $this->level->getChunk($x >> 4, $z >> 4, true);
+        for ($x = $this->getA()->getX() >> 4; $x <= $this->getB()->getX() >> 4; $x ++){
+            for ($z = $this->getA()->getZ() >> 4; $z <= $this->getB()->getZ() >> 4; $z ++) {
+                $chunk = $this->level->getChunk($x, $z, true);
                 $chunkClass = get_class($chunk);
-                $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->toBinary();
+                $chunks[Level::chunkHash($x, $z)] = $chunk->toBinary();
             }
         }
         $resetTask = new MineResetTask($chunks, $this->a, $this->b, $this->data, $this->getLevel()->getId(), $this->base->getRegionBlocker()->blockZone($this->a, $this->b, $this->level), $chunkClass);
