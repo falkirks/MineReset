@@ -47,7 +47,8 @@ class MineResetTask extends AsyncTask{
                     $a = rand(0, end($sum));
                     for ($l = 0; $l < count($sum); $l++) {
                         if ($a <= $sum[$l]) {
-                            $chunks[Level::chunkHash($x >> 4, $z >> 4)]->setBlock($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l] & 0xff, 0);
+                            $hash = Level::chunkHash($x >> 4, $z >> 4);
+                            if(isset($chunks[$hash])) $chunks[$hash]->setBlock($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l] & 0xff, 0);
                             $l = count($sum);
                         }
                     }
