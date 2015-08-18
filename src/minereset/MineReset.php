@@ -88,7 +88,12 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                                     $save = [];
                                     foreach ($sets as $key => $item) {
                                         if ( $key & 1 ) {
-                                            $save[$sets[$key-1]] = $item;
+                                            if(isset($save[$sets[$key-1]])){
+                                                $save[$sets[$key-1]] += $item;
+                                            }
+                                            else {
+                                                $save[$sets[$key - 1]] = $item;
+                                            }
                                         }
                                     }
                                     $this->mines[$args[1]]->setData($save);

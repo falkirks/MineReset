@@ -37,6 +37,14 @@ class MineResetTask extends AsyncTask{
         }
         $sum = [];
         $id = array_keys(unserialize($this->ratioData));
+        for($i = 0; $i < count($id); $i++){
+            $blockId = explode(":", $id[$i]);
+            if(!isset($blockId[1])){
+                $blockId[1] = 0;
+            }
+            $id[$i] = $blockId;
+        }
+
         $m = array_values(unserialize($this->ratioData));
         $sum[0] = $m[0];
         for ($l = 1; $l < count($m); $l++) $sum[$l] = $sum[$l - 1] + $m[$l];
@@ -48,7 +56,9 @@ class MineResetTask extends AsyncTask{
                     for ($l = 0; $l < count($sum); $l++) {
                         if ($a <= $sum[$l]) {
                             $hash = Level::chunkHash($x >> 4, $z >> 4);
-                            if(isset($chunks[$hash])) $chunks[$hash]->setBlock($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l] & 0xff, 0);
+                            if(isset($chunks[$hash])){
+                                $chunks[$hash]->setBlock($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l][0] & 0xff, $id[$l][1] & 0xff);
+                            }
                             $l = count($sum);
                         }
                     }

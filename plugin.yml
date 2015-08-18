@@ -1,6 +1,6 @@
 name: MineReset
 main: minereset\MineReset
-version: 2.0.3
+version: 2.1
 author: Falk
 api: [1.0.0]
 load: POSTWORLD
@@ -23,4 +23,4 @@ permissions:
      minereset.command.reset:
       description: Reset mines
      minereset.command.destroy:
-      description: Remove old mines
+      description: Remove mines
