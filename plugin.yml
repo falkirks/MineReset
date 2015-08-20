@@ -7,7 +7,7 @@ load: POSTWORLD
 commands:
  mine:
   description: MineReset command
-  usage: /mine < create <name> / set <name> <contents> / reset <name> >
+  usage: /mine < create <name> / set <name> <contents> / reset <name> / destroy <name> >
 permissions:
  minereset:
   default: op
