@@ -10,6 +10,7 @@ use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
+use pocketmine\utils\TextFormat;
 
 class MineReset extends PluginBase implements CommandExecutor, Listener{
     public $sessions;
@@ -31,7 +32,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
     public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
         if(isset($args[0])){
             if(!$sender->hasPermission("minereset.commmand." . $args[0])){
-                $sender->sendMessage("You do not have permission.");
+                $sender->sendMessage(TextFormat::RED . "You do not have permission.");
                 return true;
             }
             else{
@@ -42,21 +43,21 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             if(isset($args[1])){
                                 if(!isset($this->mines[$args[1]])){
                                     $this->sessions[$sender->getName()] = [$args[1]];
-                                    $sender->sendMessage("Tap a block to set as first position...");
+                                    $sender->sendMessage(TextFormat::GREEN . "Tap a block to set as first position...");
                                     return true;
                                 }
                                 else{
-                                    $sender->sendMessage("That mine already exists.");
+                                    $sender->sendMessage(TextFormat::RED . "That mine already exists.");
                                     return true;
                                 }
                             }
                             else{
-                                $sender->sendMessage("You must specify a name.");
+                                $sender->sendMessage(TextFormat::RED . "You must specify a name.");
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("Please run command in game.");
+                            $sender->sendMessage(TextFormat::RED . "Please run command in game.");
                             return true;
                         }
                         break;
@@ -66,16 +67,16 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             if(isset($this->mines[$args[1]])){
                                 unset($this->mines[$args[1]]);
                                 $this->saveConfig();
-                                $sender->sendMessage($args[1] . " has been destroyed.");
+                                $sender->sendMessage(TextFormat::GREEN . "Mine " . $args[1] . " has been destroyed.");
                                 return true;
                             }
                             else{
-                                $sender->sendMessage("That mine doesn't exist.");
+                                $sender->sendMessage(TextFormat::RED . "That mine doesn't exist.");
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("You must specify a name.");
+                            $sender->sendMessage(TextFormat::RED . "You must specify a name.");
                             return true;
                         }
                         break;
@@ -97,22 +98,22 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                                         }
                                     }
                                     $this->mines[$args[1]]->setData($save);
-                                    $sender->sendMessage("Mine setted.");
+                                    $sender->sendMessage(TextFormat::GREEN . "Mine setted.");
                                     $this->saveConfig();
                                     return true;
                                 }
                                 else{
-                                    $sender->sendMessage("Mine doesn't exist.");
+                                    $sender->sendMessage(TextFormat::RED . "Mine doesn't exist.");
                                     return true;
                                 }
                             }
                             else{
-                                $sender->sendMessage("You must provide at least one value.");
+                                $sender->sendMessage(TextFormat::RED . "You must provide at least one value.");
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("You must specify a name.");
+                            $sender->sendMessage(TextFormat::RED . "You must specify a name.");
                             return true;
                         }
                         break;
@@ -122,34 +123,34 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             if(isset($this->mines[$args[1]])){
                                 if($this->mines[$args[1]]->isMineSet()){
                                     $this->mines[$args[1]]->resetMine();
-                                    $sender->sendMessage("Mine is now resetting.");
+                                    $sender->sendMessage(TextFormat::GREEN . "Mine is now resetting.");
                                     return true;
                                 }
                                 else{
-                                    $sender->sendMessage("Mine has not been set.");
+                                    $sender->sendMessage(TextFormat::RED . "Mine has not been set.");
                                     return true;
                                 }
                             }
                             else{
-                                $sender->sendMessage("Mine doesn't exist.");
+                                $sender->sendMessage(TextFormat::RED . "Mine doesn't exist.");
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("You need to specify a name.");
+                            $sender->sendMessage(TextFormat::RED . "You need to specify a name.");
                             return true;
                         }
                         break;
                     case "longreset":
                     case "lr":
-                        $sender->sendMessage("Long resetting is no longer supported, if you need it use an older version.");
+                        $sender->sendMessage(TextFormat::RED . "Long resetting is no longer supported, if you need it use an older version.");
                         return true;
                         break;
                 }
             }
         }
         else{
-            $sender->sendMessage("You must specify the action to perform.");
+            $sender->sendMessage(TextFormat::RED . "You must specify the action to perform.");
             return true;
         }
         return false;
@@ -160,13 +161,13 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                 $a = $this->sessions[$event->getPlayer()->getName()][1];
                 $b = $event->getBlock();
                 $this->mines[$this->sessions[$event->getPlayer()->getName()][0]] = new Mine($this, new Vector3(min($a->getX(), $b->getX()), min($a->getY(), $b->getY()), min($a->getZ(), $b->getZ())), new Vector3(max($a->getX(), $b->getX()), max($a->getY(), $b->getY()), max($a->getZ(), $b->getZ())), $b->getLevel());
-                $event->getPlayer()->sendMessage("Mine created.");
+                $event->getPlayer()->sendMessage(TextFormat::GREEN . "Mine created.");
                 unset($this->sessions[$event->getPlayer()->getName()]);
                 $this->saveConfig();
             }
             else{
                 $this->sessions[$event->getPlayer()->getName()][1] = new Vector3($event->getBlock()->getX(), $event->getBlock()->getY(), $event->getBlock()->getZ());
-                $event->getPlayer()->sendMessage("Tap another block to create mine");
+                $event->getPlayer()->sendMessage(TextFormat::GREEN . "Tap another block to create mine");
             }
         }
     }
