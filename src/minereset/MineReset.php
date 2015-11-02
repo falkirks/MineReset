@@ -171,6 +171,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
         }
     }
     public function saveConfig(){
+        $this->mineData->setAll([]);
         foreach($this->mines as $n => $mine){
             $this->mineData->set($n, [$mine->getA()->getX(), $mine->getB()->getX(), $mine->getA()->getY(), $mine->getB()->getY(), $mine->getA()->getZ(), $mine->getB()->getZ(), (count($mine->getData()) > 0 ? $mine->getData() : false) , $mine->getLevel()->getName()]);
         }
