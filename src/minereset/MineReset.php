@@ -10,6 +10,7 @@ use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
+use pocketmine\utils\TextFormat;
 
 class MineReset extends PluginBase implements CommandExecutor, Listener{
     public $sessions;
@@ -31,7 +32,7 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
     public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
         if(isset($args[0])){
             if(!$sender->hasPermission("minereset.commmand." . $args[0])){
-                $sender->sendMessage("You do not have permission.");
+                $sender->sendMessage(TextFormat::RED . "You do not have permission." . TextFormat::RESET);
                 return true;
             }
             else{
@@ -46,17 +47,17 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                                     return true;
                                 }
                                 else{
-                                    $sender->sendMessage("That mine already exists.");
+                                    $sender->sendMessage(TextFormat::RED . "That mine already exists." . TextFormat::RESET);
                                     return true;
                                 }
                             }
                             else{
-                                $sender->sendMessage("You must specify a name.");
+                                $sender->sendMessage(TextFormat::RED . "You must specify a name." . TextFormat::RESET);
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("Please run command in game.");
+                            $sender->sendMessage(TextFormat::RED . "Please run command in game." . TextFormat::RESET);
                             return true;
                         }
                         break;
@@ -66,16 +67,16 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             if(isset($this->mines[$args[1]])){
                                 unset($this->mines[$args[1]]);
                                 $this->saveConfig();
-                                $sender->sendMessage($args[1] . " has been destroyed.");
+                                $sender->sendMessage("Mine " . $args[1] . " has been destroyed.");
                                 return true;
                             }
                             else{
-                                $sender->sendMessage("That mine doesn't exist.");
+                                $sender->sendMessage(TextFormat::RED . "That mine doesn't exist." . TextFormat::RESET);
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("You must specify a name.");
+                            $sender->sendMessage(TextFormat::RED . "You must specify a name." . TextFormat::RESET);
                             return true;
                         }
                         break;
@@ -102,17 +103,17 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                                     return true;
                                 }
                                 else{
-                                    $sender->sendMessage("Mine doesn't exist.");
+                                    $sender->sendMessage(TextFormat::RED . "Mine doesn't exist." . TextFormat::RESET);
                                     return true;
                                 }
                             }
                             else{
-                                $sender->sendMessage("You must provide at least one value.");
+                                $sender->sendMessage(TextFormat::RED . "You must provide at least one value." . TextFormat::RESET);
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("You must specify a name.");
+                            $sender->sendMessage(TextFormat::RED . "You must specify a name." . TextFormat::RESET);
                             return true;
                         }
                         break;
@@ -126,30 +127,30 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                                     return true;
                                 }
                                 else{
-                                    $sender->sendMessage("Mine has not been set.");
+                                    $sender->sendMessage(TextFormat::RED . "Mine has not been set." . TextFormat::RESET);
                                     return true;
                                 }
                             }
                             else{
-                                $sender->sendMessage("Mine doesn't exist.");
+                                $sender->sendMessage(TextFormat::RED . "Mine doesn't exist." . TextFormat::RESET);
                                 return true;
                             }
                         }
                         else{
-                            $sender->sendMessage("You need to specify a name.");
+                            $sender->sendMessage(TextFormat::RED . "You need to specify a name." . TextFormat::RESET);
                             return true;
                         }
                         break;
                     case "longreset":
                     case "lr":
-                        $sender->sendMessage("Long resetting is no longer supported, if you need it use an older version.");
+                        $sender->sendMessage(TextFormat::RED . "Long resetting is no longer supported, if you need it use an older version." . TextFormat::RESET);
                         return true;
                         break;
                 }
             }
         }
         else{
-            $sender->sendMessage("You must specify the action to perform.");
+            $sender->sendMessage(TextFormat::RED . "You must specify the action to perform." . TextFormat::RESET);
             return true;
         }
         return false;
