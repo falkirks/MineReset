@@ -5,6 +5,7 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
+use pocketmine\utils\TextFormat;
 
 class RegionBlocker implements Listener{
     /** @var MineReset  */
@@ -19,7 +20,7 @@ class RegionBlocker implements Listener{
             foreach($this->activeZones[$event->getPlayer()->getLevel()->getId()] as $zone){
                 if($this->isInsideZone($event->getTo(), $zone[0], $zone[1])){
                     $event->setCancelled();
-                    $event->getPlayer()->sendMessage("You can't go in there, a mine is resetting.");
+                    $event->getPlayer()->sendMessage(TextFormat::RED . "You can't go in there, a mine is resetting." . TextFormat::RESET);
                     return;
                 }
             }
