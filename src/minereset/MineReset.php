@@ -87,20 +87,25 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                                 if (isset($this->mines[$args[1]])) {
                                     $sets = array_slice($args, 2);
                                     $save = [];
-                                    foreach ($sets as $key => $item) {
-                                        if ( $key & 1 ) {
-                                            if(isset($save[$sets[$key-1]])){
-                                                $save[$sets[$key-1]] += $item;
-                                            }
-                                            else {
-                                                $save[$sets[$key - 1]] = $item;
+                                    if(count($sets) % 2 === 0) {
+                                        foreach ($sets as $key => $item) {
+                                            if ($key & 1) {
+                                                if (isset($save[$sets[$key - 1]])) {
+                                                    $save[$sets[$key - 1]] += $item;
+                                                } else {
+                                                    $save[$sets[$key - 1]] = $item;
+                                                }
                                             }
                                         }
+                                        $this->mines[$args[1]]->setData($save);
+                                        $sender->sendMessage("Mine setted.");
+                                        $this->saveConfig();
+                                        return true;
                                     }
-                                    $this->mines[$args[1]]->setData($save);
-                                    $sender->sendMessage("Mine setted.");
-                                    $this->saveConfig();
-                                    return true;
+                                    else{
+                                        $sender->sendMessage(TextFormat::RED . "Your format string looks corrupted." . TextFormat::RESET);
+                                        return true;
+                                    }
                                 }
                                 else{
                                     $sender->sendMessage(TextFormat::RED . "Mine doesn't exist." . TextFormat::RESET);
