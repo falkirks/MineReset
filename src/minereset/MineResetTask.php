@@ -17,7 +17,6 @@ class MineResetTask extends AsyncTask{
     private $chunkClass;
 
     public function __construct(array $chunks, Vector3 $a, Vector3 $b, array $data, $levelId, $regionId, $chunkClass){
-        parent::__construct(null);
         $this->chunks = serialize($chunks);
         $this->a = $a;
         $this->b = $b;
