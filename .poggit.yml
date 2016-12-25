@@ -1,0 +1,7 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/Falkirks/MineReset
+branches:
+- master
+projects:
+  MineReset:
+    path: ""
+...
