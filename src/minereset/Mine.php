@@ -42,7 +42,7 @@ class Mine{
                 //$this->getLevel()->getServer()->getLogger()->info(Level::chunkHash($x >> 4, $z >> 4));
                 $chunk = $this->level->getChunk($x >> 4, $z >> 4, true);
                 $chunkClass = get_class($chunk);
-                $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->toBinary();
+                $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->fastSerialize($chunk);
             }
         }
 
