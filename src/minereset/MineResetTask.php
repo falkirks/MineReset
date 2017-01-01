@@ -36,7 +36,7 @@ class MineResetTask extends AsyncTask{
         /** @var  Chunk[] $chunks */
         $chunks = unserialize($this->chunks);
         foreach($chunks as $hash => $binary){
-            $chunks[$hash] = $chunkClass::fromBinary($binary);
+            $chunks[$hash] = $chunkClass::fastDeserialize($binary);
         }
         $sum = [];
         $id = array_keys(unserialize($this->ratioData));
