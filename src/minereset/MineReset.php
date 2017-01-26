@@ -146,6 +146,16 @@ class MineReset extends PluginBase implements CommandExecutor, Listener{
                             return true;
                         }
                         break;
+                    case "reset-all":
+                        $i = 0;
+                        foreach($this->mines as $mine) {
+                            if($mine->isMineSet()) {
+                                $mine->resetMine();
+                                $i++;
+                            }
+                        }
+                        $sender->sendMessage("Resetting {$i} mines.");
+                        return true;
                     case "longreset":
                     case "lr":
                         $sender->sendMessage(TextFormat::RED . "Long resetting is no longer supported, if you need it use an older version." . TextFormat::RESET);
