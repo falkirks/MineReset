@@ -24,3 +24,5 @@ permissions:
       description: Reset mines
      minereset.command.destroy:
       description: Remove mines
+     minereset.command.reset-all:
+      description: Reset all mines
