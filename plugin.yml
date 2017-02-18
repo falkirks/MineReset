@@ -1,6 +1,6 @@
 name: MineReset
 main: minereset\MineReset
-version: 2.2
+version: 2.3
 author: Falk
 api: [1.0.0, 2.0.0]
 load: POSTWORLD
