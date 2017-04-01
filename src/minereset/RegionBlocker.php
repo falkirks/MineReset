@@ -10,11 +10,18 @@ use pocketmine\utils\TextFormat;
 class RegionBlocker implements Listener{
     /** @var MineReset  */
     private $plugin;
+    /** @var array[] $activeZones */
+    private $activeZones = [];
     public function __construct(MineReset $mineReset){
         $this->plugin = $mineReset;
         $this->activeZones = [];
         $this->plugin->getServer()->getPluginManager()->registerEvents($this, $this->plugin);
     }
+    /**
+     * @priority HIGH
+     *
+     * @param PlayerMoveEvent $event
+     */
     public function onPlayerMove(PlayerMoveEvent $event){
         if(isset($this->activeZones[$event->getPlayer()->getLevel()->getId()])){
             foreach($this->activeZones[$event->getPlayer()->getLevel()->getId()] as $zone){
@@ -26,6 +33,12 @@ class RegionBlocker implements Listener{
             }
         }
     }
+    /**
+     * @param Vector3 $a
+     * @param Vector3 $b
+     * @param Level $level
+     * @return int
+     */
     public function blockZone(Vector3 $a, Vector3 $b, Level $level){
         if(!isset($this->activeZones[$level->getId()])) $this->activeZones[$level->getId()] = [];
         $id = count($this->activeZones[$level->getId()]);
@@ -33,22 +46,35 @@ class RegionBlocker implements Listener{
         $this->clearZone($level, $id);
         return $id;
     }
-    public function freeZone($id, $level){
-        if($level instanceof Level) $level = $level->getId();
-        if(isset($this->activeZones[$level]) && isset($this->activeZones[$level][$id])){
+    /**
+     * @param int $id
+     * @param int $level
+     */
+    public function freeZone(int $id, int $level){
+        if(isset($this->activeZones[$level]) and isset($this->activeZones[$level][$id])){
             unset($this->activeZones[$level][$id]);
         }
     }
+    /**
+     * @param Vector3 $test
+     * @param Vector3 $a
+     * @param Vector3 $b
+     * @return bool
+     */
     protected function isInsideZone(Vector3 $test, Vector3 $a, Vector3 $b){
-        return ($test->getX() >= $a->getX() && $test->getX() <= $b->getX() && $test->getY() >= $a->getY() && $test->getY() <= $b->getY() && $test->getZ() >= $a->getZ() && $test->getZ() <= $b->getZ());
+        return ($test->getX() >= $a->getX() and $test->getX() <= $b->getX() and $test->getY() >= $a->getY() and $test->getY() <= $b->getY() and $test->getZ() >= $a->getZ() and $test->getZ() <= $b->getZ());
     }
-    protected function clearZone($level, $id){
-        if($level instanceof Level) $level = $level->getId();
-        if(isset($this->activeZones[$level]) && isset($this->activeZones[$level][$id])){
+    /**
+     * @param Level $level
+     * @param int $id
+     */
+    protected function clearZone(Level $level, int $id){
+        $level = $level->getId();
+        if(isset($this->activeZones[$level]) and isset($this->activeZones[$level][$id])){
             foreach($this->plugin->getServer()->getOnlinePlayers() as $player){
-                if($player->getLevel()->getId() === $level && $this->isInsideZone($player->getPosition(), $this->activeZones[$level][$id][0], $this->activeZones[$level][$id][1])){
+                if($player->getLevel()->getId() === $level and $this->isInsideZone($player->getPosition(), $this->activeZones[$level][$id][0], $this->activeZones[$level][$id][1])){
                     $player->teleport($player->getSpawn());
-                    $player->sendMessage("You have been teleported because you were inside a mine when it was resetting.");
+                    $player->sendMessage("You have been teleported because you were inside a mine while it was resetting.");
                 }
             }
         }
