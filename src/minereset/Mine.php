@@ -1,53 +1,77 @@
 <?php
 namespace minereset;
 
-use pocketmine\block\Block;
-use pocketmine\level\format\mcregion\Chunk;
+use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 
 class Mine{
-    public $a, $b, $lev, $data;
-    /** @var MineReset  */
+    public $a, $b, $level, $data, $name;
+    /** @var MineReset $base */
     private $base;
-    public function __construct(MineReset $base, Vector3 $a, Vector3 $b, Level $level, array $data = []){
+    public function __construct(MineReset $base, string $name, Vector3 $a, Vector3 $b, int $level, array $data = []){
         $this->a = $a;
         $this->b = $b;
         $this->base = $base;
+        $this->name = $name;
         $this->data = $data;
         $this->level = $level;
     }
+    /**
+     * @return bool
+     */
     public function isMineSet(){
         return (count($this->data) != 0);
     }
+    /**
+     * @param array $arr
+     */
     public function setData(array $arr){
         $this->data = $arr;
     }
+    /**
+     * @return Vector3
+     */
     public function getA(){
         return $this->a;
     }
+    /**
+     * @return Vector3
+     */
     public function getB(){
         return $this->b;
     }
+    /**
+     * @return Level|null
+     */
     public function getLevel(){
-        return $this->level;
+        return $this->base->getServer()->getLevel($this->level);
     }
+    public function getName() {
+        return $this->name;
+    }
+    /**
+     * @return array
+     */
     public function getData(){
         return $this->data;
     }
     public function resetMine(){
         $chunks = [];
+        $chunkClass = Chunk::class;
         for ($x = $this->getA()->getX(); $x-16 <= $this->getB()->getX(); $x += 16){
             for ($z = $this->getA()->getZ(); $z-16 <= $this->getB()->getZ(); $z += 16) {
                 //$this->getLevel()->getServer()->getLogger()->info(Level::chunkHash($x >> 4, $z >> 4));
-                $chunk = $this->level->getChunk($x >> 4, $z >> 4, true);
+                $chunk = $this->getLevel()->getChunk($x >> 4, $z >> 4, true);
                 $chunkClass = get_class($chunk);
-                $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->fastSerialize($chunk);
+                $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->fastSerialize();
             }
         }
-
         //var_dump($chunks);
-        $resetTask = new MineResetTask($chunks, $this->a, $this->b, $this->data, $this->getLevel()->getId(), $this->base->getRegionBlocker()->blockZone($this->a, $this->b, $this->level), $chunkClass);
+        $resetTask = new MineResetTask($chunks, $this->a, $this->b, $this->data, $this->level, $this->base->getRegionBlocker()->blockZone($this->a, $this->b, $this->getLevel()), $chunkClass);
         $this->base->scheduleReset($resetTask);
+    }
+    public function __toString(){
+        return $this->getName();
     }
 }
