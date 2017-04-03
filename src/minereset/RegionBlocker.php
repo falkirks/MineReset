@@ -51,7 +51,7 @@ class RegionBlocker implements Listener{
      * @param int $level
      */
     public function freeZone(int $id, int $level){
-        if(isset($this->activeZones[$level]) and isset($this->activeZones[$level][$id])){
+        if(isset($this->activeZones[$level]) && isset($this->activeZones[$level][$id])){
             unset($this->activeZones[$level][$id]);
         }
     }
@@ -62,7 +62,7 @@ class RegionBlocker implements Listener{
      * @return bool
      */
     protected function isInsideZone(Vector3 $test, Vector3 $a, Vector3 $b){
-        return ($test->getX() >= $a->getX() and $test->getX() <= $b->getX() and $test->getY() >= $a->getY() and $test->getY() <= $b->getY() and $test->getZ() >= $a->getZ() and $test->getZ() <= $b->getZ());
+        return ($test->getX() >= $a->getX() && $test->getX() <= $b->getX() && $test->getY() >= $a->getY() && $test->getY() <= $b->getY() && $test->getZ() >= $a->getZ() && $test->getZ() <= $b->getZ());
     }
     /**
      * @param Level $level
@@ -70,9 +70,9 @@ class RegionBlocker implements Listener{
      */
     protected function clearZone(Level $level, int $id){
         $level = $level->getId();
-        if(isset($this->activeZones[$level]) and isset($this->activeZones[$level][$id])){
+        if(isset($this->activeZones[$level]) && isset($this->activeZones[$level][$id])){
             foreach($this->plugin->getServer()->getOnlinePlayers() as $player){
-                if($player->getLevel()->getId() === $level and $this->isInsideZone($player->getPosition(), $this->activeZones[$level][$id][0], $this->activeZones[$level][$id][1])){
+                if($player->getLevel()->getId() === $level && $this->isInsideZone($player->getPosition(), $this->activeZones[$level][$id][0], $this->activeZones[$level][$id][1])){
                     $player->teleport($player->getSpawn());
                     $player->sendMessage("You have been teleported because you were inside a mine while it was resetting.");
                 }
