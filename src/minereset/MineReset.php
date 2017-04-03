@@ -162,9 +162,10 @@ class MineReset extends PluginBase implements Listener{
                     case "l":
                         $list = "All of the mines are named as follows:\n";
                         ksort($this->mines, SORT_NATURAL);
-                        foreach ($this->mines as $name => $mine) {
-                            $list .= $name . ", ";
+                        foreach (array_keys($this->mines) as $mine) {
+                            $list .= $mine . ", ";
                         }
+                        rtrim($list, ", \t\n");
                         $sender->sendMessage($list);
                         break;
                     case "reset-all":
@@ -248,8 +249,7 @@ class MineReset extends PluginBase implements Listener{
                 $this->getLogger()->error("The block settings for mine '{$n}' are incorrect");
                 continue;
             }
-            $this->mines[$n] = new Mine(
-                $this,
+            $this->mines[$n] = new Mine($this,
                 $n,
                 new Vector3(min($m[0], $m[1]), min($m[2], $m[3]), min($m[4], $m[5])),
                 new Vector3(max($m[0], $m[1]), max($m[2], $m[3]), max($m[4], $m[5])),
