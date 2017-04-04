@@ -1,14 +1,14 @@
 name: MineReset
 main: minereset\MineReset
-version: 2.1
+version: 2.3
 author: Falk
-api: [1.0.0, 2.0.0]
+api: [1.0.0, 2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5]
 load: POSTWORLD
 commands:
  mine:
-  description: MineReset command
-  usage: /mine < create <name> / set <name> <contents> / reset <name> / destroy <name> >
-  permission: minereset
+  description: "MineReset command"
+  usage: "/mine <create|set|list|reset|reset-all|destroy> <name> [parameters]"
+  permission: minereset.command
 permissions:
  minereset:
   default: op
@@ -25,3 +25,5 @@ permissions:
       description: Reset mines
      minereset.command.destroy:
       description: Remove mines
+     minereset.command.reset-all:
+      description: Reset all mines
