@@ -8,14 +8,20 @@ use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 
 class MineResetTask extends AsyncTask{
+    /** @var string $chunks */
     private $chunks;
+    /** @var Vector3 $a */
     private $a;
+    /** @var Vector3 $b */
     private $b;
+    /** @var string $ratioData */
     private $ratioData;
+    /** @var int $regionId */
     private $regionId;
+    /** @var int $levelId */
     private $levelId;
+    /** @var Chunk $chunkClass */
     private $chunkClass;
-
     public function __construct(array $chunks, Vector3 $a, Vector3 $b, array $data, $levelId, $regionId, $chunkClass){
         $this->chunks = serialize($chunks);
         $this->a = $a;
@@ -24,6 +30,7 @@ class MineResetTask extends AsyncTask{
         $this->levelId = $levelId;
         $this->regionId = $regionId;
         $this->chunkClass = $chunkClass;
+        parent::__construct(null);
     }
     /**
      * Actions to execute when run
@@ -31,7 +38,6 @@ class MineResetTask extends AsyncTask{
      * @return void
      */
     public function onRun(){
-
         $chunkClass = $this->chunkClass;
         /** @var  Chunk[] $chunks */
         $chunks = unserialize($this->chunks);
@@ -47,11 +53,10 @@ class MineResetTask extends AsyncTask{
             }
             $id[$i] = $blockId;
         }
-
         $m = array_values(unserialize($this->ratioData));
         $sum[0] = $m[0];
-        for ($l = 1; $l < count($m); $l++) $sum[$l] = $sum[$l - 1] + $m[$l];
-
+        for ($l = 1; $l < count($m); $l++)
+            $sum[$l] = $sum[$l - 1] + $m[$l];
         for ($x = $this->a->getX(); $x <= $this->b->getX(); $x++) {
             for ($y = $this->a->getY(); $y <= $this->b->getY(); $y++) {
                 for ($z = $this->a->getZ(); $z <= $this->b->getZ(); $z++) {
@@ -70,12 +75,15 @@ class MineResetTask extends AsyncTask{
         }
         $this->setResult($chunks);
     }
+    /**
+     * @param Server $server
+     */
     public function onCompletion(Server $server){
         $chunks = $this->getResult();
         $plugin = $server->getPluginManager()->getPlugin("MineReset");
         if($plugin instanceof MineReset and $plugin->isEnabled()) {
             $level = $server->getLevel($this->levelId);
-            if ($level != null) {
+            if ($level instanceof Level) {
                 foreach ($chunks as $hash => $chunk) {
                     Level::getXZ($hash, $x, $z);
                     $level->setChunk($x, $z, $chunk);
