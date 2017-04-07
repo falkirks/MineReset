@@ -30,7 +30,6 @@ class MineResetTask extends AsyncTask{
         $this->levelId = $levelId;
         $this->regionId = $regionId;
         $this->chunkClass = $chunkClass;
-        parent::__construct(null);
     }
     /**
      * Actions to execute when run
