@@ -160,13 +160,10 @@ class MineReset extends PluginBase implements Listener{
                         break;
                     case "list":
                     case "l":
-                        $list = "All of the mines are named as follows:\n";
-                        ksort($this->mines, SORT_NATURAL);
-                        foreach (array_keys($this->mines) as $mine) {
-                            $list .= $mine . ", ";
-                        }
-                        rtrim($list, ", \t\n");
-                        $sender->sendMessage($list);
+                        if(count($this->mines) == 0)
+                            $sender->sendMessage("You have no mines.");
+                        else
+                            $sender->sendMessage("Mines: " . implode(",", array_keys($this->mines)));
                         break;
                     case "reset-all":
                         $i = 0;
@@ -200,13 +197,11 @@ class MineReset extends PluginBase implements Listener{
                 /** @var Vector3 $a */
                 $a = $this->sessions[$event->getPlayer()->getName()][1];
                 $b = $event->getBlock();
-                $this->mines[$this->sessions[$event->getPlayer()->getName()][0]] = new Mine(
-                    $this,
+                $this->mines[$this->sessions[$event->getPlayer()->getName()][0]] = new Mine($this,
                     $this->sessions[$event->getPlayer()->getName()][0],
                     new Vector3(min($a->getX(), $b->getX()), min($a->getY(), $b->getY()), min($a->getZ(), $b->getZ())),
                     new Vector3(max($a->getX(), $b->getX()), max($a->getY(), $b->getY()), max($a->getZ(), $b->getZ())),
-                    $b->getLevel()->getId()
-                );
+                    $b->getLevel()->getId());
                 $event->getPlayer()->sendMessage("Mine created.");
                 unset($this->sessions[$event->getPlayer()->getName()]);
                 $this->saveConfig();
@@ -254,8 +249,7 @@ class MineReset extends PluginBase implements Listener{
                 new Vector3(min($m[0], $m[1]), min($m[2], $m[3]), min($m[4], $m[5])),
                 new Vector3(max($m[0], $m[1]), max($m[2], $m[3]), max($m[4], $m[5])),
                 $this->getServer()->getLevelByName($m[7])->getId(),
-                $m[6]
-            );
+                $m[6]);
         }
     }
 

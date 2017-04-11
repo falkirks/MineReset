@@ -62,7 +62,9 @@ class RegionBlocker implements Listener{
      * @return bool
      */
     protected function isInsideZone(Vector3 $test, Vector3 $a, Vector3 $b){
-        return ($test->getX() >= $a->getX() && $test->getX() <= $b->getX() && $test->getY() >= $a->getY() && $test->getY() <= $b->getY() && $test->getZ() >= $a->getZ() && $test->getZ() <= $b->getZ());
+        return ($test->getX() >= $a->getX() && $test->getX() <= $b->getX()
+                && $test->getY() >= $a->getY() && $test->getY() <= $b->getY()
+                && $test->getZ() >= $a->getZ() && $test->getZ() <= $b->getZ());
     }
     /**
      * @param Level $level

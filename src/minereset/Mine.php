@@ -6,7 +6,11 @@ use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 
 class Mine{
-    public $a, $b, $level, $data, $name;
+    private $a;
+    private $b;
+    private $level;
+    private $data;
+    private $name;
     /** @var MineReset $base */
     private $base;
     public function __construct(MineReset $base, string $name, Vector3 $a, Vector3 $b, int $level, array $data = []){
@@ -61,15 +65,13 @@ class Mine{
         $chunkClass = Chunk::class;
         for ($x = $this->getA()->getX(); $x-16 <= $this->getB()->getX(); $x += 16){
             for ($z = $this->getA()->getZ(); $z-16 <= $this->getB()->getZ(); $z += 16) {
-                //$this->getLevel()->getServer()->getLogger()->info(Level::chunkHash($x >> 4, $z >> 4));
                 $chunk = $this->getLevel()->getChunk($x >> 4, $z >> 4, true);
                 $chunkClass = get_class($chunk);
                 $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->fastSerialize();
             }
         }
-        //var_dump($chunks);
         $resetTask = new MineResetTask($chunks, $this->a, $this->b, $this->data, $this->level, $this->base->getRegionBlocker()->blockZone($this->a, $this->b, $this->getLevel()), $chunkClass);
-        $this->base->scheduleReset($resetTask);
+        $this->base->getServer()->getScheduler()->scheduleAsyncTask($mineResetTask);
     }
     public function __toString(){
         return $this->getName();
