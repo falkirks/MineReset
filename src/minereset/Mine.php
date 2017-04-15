@@ -71,7 +71,7 @@ class Mine{
             }
         }
         $resetTask = new MineResetTask($chunks, $this->a, $this->b, $this->data, $this->level, $this->base->getRegionBlocker()->blockZone($this->a, $this->b, $this->getLevel()), $chunkClass);
-        $this->base->getServer()->getScheduler()->scheduleAsyncTask($mineResetTask);
+        $this->base->getServer()->getScheduler()->scheduleAsyncTask($resetTask);
     }
     public function __toString(){
         return $this->getName();
