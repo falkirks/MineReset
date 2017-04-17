@@ -2,6 +2,7 @@
 namespace falkirks\minereset;
 
 
+use falkirks\minereset\command\AboutCommand;
 use falkirks\minereset\command\CreateCommand;
 use falkirks\minereset\command\DestroyCommand;
 use falkirks\minereset\command\ListCommand;
@@ -11,6 +12,7 @@ use falkirks\minereset\command\ResetCommand;
 use falkirks\minereset\command\SetCommand;
 use falkirks\minereset\listener\CreationListener;
 use falkirks\minereset\listener\RegionBlockerListener;
+use falkirks\minereset\store\EntityStore;
 use falkirks\minereset\store\YAMLStore;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
@@ -52,6 +54,7 @@ class MineReset extends PluginBase{
         $this->mainCommand = new MineCommand($this);
         $this->getServer()->getCommandMap()->register("minereset", $this->mainCommand);
 
+        $this->mainCommand->registerSubCommand("about", new AboutCommand($this));
         $this->mainCommand->registerSubCommand("list", new ListCommand($this));
         $this->mainCommand->registerSubCommand("create", new CreateCommand($this));
         $this->mainCommand->registerSubCommand("set", new SetCommand($this));
@@ -99,5 +102,4 @@ class MineReset extends PluginBase{
     public function getRegionBlockerListener(): RegionBlockerListener{
         return $this->regionBlockerListener;
     }
-    
 }

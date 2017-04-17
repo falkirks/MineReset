@@ -56,7 +56,7 @@ class Mine{
     }
 
     public function isPointInside(Position $position): bool{
-        if($position->getLevel()->getId() !== $this->getLevel()->getId()){
+        if($this->getLevel() !== null && $position->getLevel()->getId() !== $this->getLevel()->getId()){
             return false;
         }
 
@@ -69,9 +69,9 @@ class Mine{
     }
 
     /**
-     * @return Level
+     * @return Level | null
      */
-    public function getLevel(): Level{
+    public function getLevel(){
         return $this->api->getApi()->getServer()->getLevelByName($this->level);
     }
 
@@ -119,7 +119,7 @@ class Mine{
     }
 
     public function reset(){
-        if(!$this->isResetting()){
+        if(!$this->isResetting() && $this->getLevel() !== null){
             $this->isResetting = true;
 
             $chunks = [];
@@ -127,6 +127,7 @@ class Mine{
             for ($x = $this->getPointA()->getX(); $x-16 <= $this->getPointB()->getX(); $x += 16){
                 for ($z = $this->getPointA()->getZ(); $z-16 <= $this->getPointB()->getZ(); $z += 16) {
                     $chunk = $this->getLevel()->getChunk($x >> 4, $z >> 4, true);
+
                     $chunkClass = get_class($chunk);
                     $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->fastSerialize();
                 }

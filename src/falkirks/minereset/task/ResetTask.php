@@ -101,6 +101,7 @@ class ResetTask extends AsyncTask{
                 foreach ($chunks as $hash => $chunk) {
                     Level::getXZ($hash, $x, $z);
                     $level->setChunk($x, $z, $chunk);
+
                 }
             }
             $plugin->getRegionBlockerListener()->clearMine($this->name);
