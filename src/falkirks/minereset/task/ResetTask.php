@@ -103,6 +103,7 @@ class ResetTask extends AsyncTask{
                     $level->setChunk($x, $z, $chunk);
                 }
             }
+            $plugin->getRegionBlockerListener()->clearMine($this->name);
             $plugin->getResetProgressManager()->notifyComplete($this->name);
         }
     }

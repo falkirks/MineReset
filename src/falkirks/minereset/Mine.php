@@ -4,6 +4,7 @@ namespace falkirks\minereset;
 use falkirks\minereset\task\ResetTask;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
+use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 
 /**
@@ -52,6 +53,19 @@ class Mine{
      */
     public function getPointB(): Vector3{
         return $this->pointB;
+    }
+
+    public function isPointInside(Position $position): bool{
+        if($position->getLevel()->getId() !== $this->getLevel()->getId()){
+            return false;
+        }
+
+        return $position->getX() >= $this->getPointA()->getX()
+            && $position->getX() <= $this->getPointB()->getX()
+            && $position->getY() >= $this->getPointA()->getY()
+            && $position->getY() <= $this->getPointB()->getY()
+            && $position->getZ() >= $this->getPointA()->getZ()
+            && $position->getZ() <= $this->getPointB()->getZ();
     }
 
     /**
@@ -106,7 +120,6 @@ class Mine{
 
     public function reset(){
         if(!$this->isResetting()){
-            //TODO make AsyncTask
             $this->isResetting = true;
 
             $chunks = [];

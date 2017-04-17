@@ -10,6 +10,7 @@ use falkirks\minereset\command\ResetAllCommand;
 use falkirks\minereset\command\ResetCommand;
 use falkirks\minereset\command\SetCommand;
 use falkirks\minereset\listener\CreationListener;
+use falkirks\minereset\listener\RegionBlockerListener;
 use falkirks\minereset\store\YAMLStore;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
@@ -27,6 +28,8 @@ class MineReset extends PluginBase{
     private $mineManager;
     /** @var  ResetProgressManager */
     private $resetProgressManager;
+    /** @var  RegionBlockerListener */
+    private $regionBlockerListener;
     /** @var  MineCommand */
     private $mainCommand;
 
@@ -39,6 +42,9 @@ class MineReset extends PluginBase{
         $this->mineManager = new MineManager($this, new YAMLStore(new Config($this->getDataFolder() . "mines.yml", Config::YAML, [])));
 
         $this->resetProgressManager = new ResetProgressManager($this);
+
+        $this->regionBlockerListener = new RegionBlockerListener($this);
+        $this->getServer()->getPluginManager()->registerEvents($this->regionBlockerListener, $this);
 
         $this->creationListener = new CreationListener($this);
         $this->getServer()->getPluginManager()->registerEvents($this->creationListener, $this);
@@ -87,5 +93,11 @@ class MineReset extends PluginBase{
         return $this->creationListener;
     }
 
-
+    /**
+     * @return RegionBlockerListener
+     */
+    public function getRegionBlockerListener(): RegionBlockerListener{
+        return $this->regionBlockerListener;
+    }
+    
 }
