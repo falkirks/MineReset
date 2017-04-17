@@ -2,13 +2,13 @@
 namespace falkirks\minereset;
 
 
-use falkirks\minereset\mine\Mine;
 use falkirks\minereset\store\DataStore;
 use falkirks\minereset\store\Reloadable;
 use falkirks\minereset\store\Saveable;
+use pocketmine\math\Vector3;
 use pocketmine\utils\TextFormat;
 
-class MineManager implements \ArrayAccess, \IteratorAggregate{
+class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
     const MEMORY_TILL_CLOSE = 0;
     const FLUSH_ON_CHANGE = 1;
     /**
@@ -20,16 +20,16 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
     /** @var DataStore  */
     private $store;
     /** @var  Mine[] */
-    private $warps;
+    private $mines;
     private $flag;
 
-    public function __construct(MineReset $api, DataStore $store, $flag = MineManager::MEMORY_TILL_CLOSE){
+    public function __construct(MineReset $api, DataStore $store, $flag = MineManager::FLUSH_ON_CHANGE){
         $this->api = $api;
         $this->store = $store;
         $this->flag = $flag;
-        $this->warps = [];
+        $this->mines = [];
         if($this->flag < 2){
-            $this->warps = $this->loadWarps();
+            $this->mines = $this->loadMines();
         }
     }
     protected function reloadStore(){
@@ -42,10 +42,10 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
             $this->store->save();
         }
     }
-    protected function loadWarps(): array{
+    protected function loadMines(): array{
         $out = [];
         foreach($this->store->getIterator() as $name => $data){
-            $out[$name] = $this->warpFromData($name, $data);
+            $out[$name] = $this->mineFromData($name, $data);
         }
         return $out;
     }
@@ -56,8 +56,8 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
     public function saveAll(){
         if($this->flag === 0){
             $this->store->clear();
-            foreach($this->warps as $warp){
-                $this->store->add($warp->getName(), $this->warpToData($warp));
+            foreach($this->mines as $mine){
+                $this->store->add($mine->getName(), $this->mineToData($mine));
             }
             $this->saveStore(true);
         }
@@ -76,7 +76,7 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
      */
     public function offsetExists($offset){
         $this->reloadStore();
-        if(isset($this->warps[$offset]) || ($this->flag >= 2 && $this->store->exists($offset))){
+        if(isset($this->mines[$offset]) || ($this->flag >= 2 && $this->store->exists($offset))){
             return true;
         }
         return false;
@@ -93,9 +93,9 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
     public function offsetGet($offset){
         if($this->flag >= 2){
             $this->reloadStore();
-            return $this->warpFromData($offset, $this->store->get($offset));
+            return $this->mineFromData($offset, $this->store->get($offset));
         }
-        return isset($this->warps[$offset]) ? $this->warps[$offset] : null;
+        return isset($this->mines[$offset]) ? $this->mines[$offset] : null;
     }
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
@@ -112,15 +112,15 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
     public function offsetSet($offset, $value){
         if($value instanceof Mine && $value->getName() === $offset) {
             if($this->flag < 2) {
-                $this->warps[$offset] = $value;
+                $this->mines[$offset] = $value;
             }
             if ($this->flag >= 1) {
-                $this->store->add($offset, $this->warpToData($value));
+                $this->store->add($offset, $this->mineToData($value));
                 $this->saveStore();
             }
         }
         else{
-            //TODO report failure
+            throw new \RuntimeException("Invalid \$offset for mine data.");
         }
     }
     /**
@@ -134,7 +134,7 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
      */
     public function offsetUnset($offset){
         if($this->flag < 2){
-            unset($this->warps[$offset]);
+            unset($this->mines[$offset]);
         }
         if($this->flag >= 1){
             $this->store->remove($offset);
@@ -149,12 +149,27 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
      * @return Mine
      * @throws \Exception
      */
-    protected function warpFromData($name, array $array){
-        if(isset($array["level"]) && isset($array["x"]) && isset($array["y"]) && isset($array["z"]) && isset($array["public"])){ // This is an internal warp
-            return new Warp($this, $name, new Destination(new WeakPosition($array["x"], $array["y"], $array["z"], $array["level"])), $array["public"], $array["metadata"] ?? []);
-        }
-        elseif(isset($array["address"]) && isset($array["port"]) && isset($array["public"])) {
-            return new Warp($this, $name, new Destination($array["address"], $array["port"]), $array["public"], $array["metadata"] ?? []);
+    protected function mineFromData($name, array $array){
+        if(count($array) === 8) {
+            if(!$this->getApi()->getServer()->isLevelLoaded($array[7])){
+                $this->api->getLogger()->warning("A mine with the name " . TextFormat::AQUA . $name . TextFormat::RESET . " is connected to a level which is not loaded. You won't be able to use it until you load the level correctly.");
+            }
+
+            if(is_array($array[6])) {
+                return new Mine($this,
+                    new Vector3(min($array[0], $array[1]), min($array[2], $array[3]), min($array[4], $array[5])),
+                    new Vector3(max($array[0], $array[1]), max($array[2], $array[3]), max($array[4], $array[5])),
+                    $array[7],
+                    $name,
+                    $array[6]);
+            }
+            else{
+                return new Mine($this,
+                    new Vector3(min($array[0], $array[1]), min($array[2], $array[3]), min($array[4], $array[5])),
+                    new Vector3(max($array[0], $array[1]), max($array[2], $array[3]), max($array[4], $array[5])),
+                    $array[7],
+                    $name);
+            }
         }
         $this->api->getLogger()->critical("A mine with the name " . TextFormat::AQUA . $name . TextFormat::RESET . " is incomplete. It will be removed automatically when your server stops.");
         return null;
@@ -163,45 +178,40 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
      * In order to pass data to a DataStore
      * a key is needed. Typically one should
      * use $warp->getName()
-     * @param Warp $warp
+     * @param Mine $mine
      * @return array
      */
-    protected function warpToData(Warp $warp){
-        $ret = [];
-        if($warp->getDestination()->isInternal()) {
-            //TODO implement yaw and pitch
-            $pos = $warp->getDestination()->getPosition();
-            $ret = [
-                "x" => $pos->getX(),
-                "y" => $pos->getY(),
-                "z" => $pos->getZ(),
-                "level" => ($pos instanceof WeakPosition ? $pos->getLevelName() : $pos->getLevel()->getName()),
-                "public" => $warp->isPublic(),
-            ];
-        }
-        else{
-            $ret = [
-                "address" => $warp->getDestination()->getAddress(),
-                "port" => $warp->getDestination()->getPort(),
-                "public" => $warp->isPublic()
-            ];
-        }
-        $ret["metadata"] = $warp->getAllMetadata();
-        return $ret;
+    protected function mineToData(Mine $mine){
+        return  [
+            $mine->getPointA()->getX(),
+            $mine->getPointB()->getX(),
+            $mine->getPointA()->getY(),
+            $mine->getPointB()->getY(),
+            $mine->getPointA()->getZ(),
+            $mine->getPointB()->getZ(),
+            (count($mine->getData()) > 0 ? $mine->getData() : false),
+            $mine->getLevelName()
+        ];
     }
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable An instance of an object implementing <b>Iterator</b> or
+     * @return \Traversable An instance of an object implementing <b>Iterator</b> or
      * <b>Traversable</b>
      */
     public function getIterator(){
         if($this->flag >= 2){
-            return $this->loadWarps();
+            return new \ArrayIterator($this->loadMines());
         }
-        return $this->warps;
+        return new \ArrayIterator($this->mines);
     }
+
+    public function count(){
+        return count($this->mines);
+    }
+
+
     /**
      * Returns the current storage-mode
      * #####
@@ -237,15 +247,28 @@ class MineManager implements \ArrayAccess, \IteratorAggregate{
     }
     /**
      * Injects a new DataStore for warps
-     * ! This will inject your code into SimpleWarp, potentially breaking!
+     * ! This will inject your code into MineReset, potentially breaking!
      * @param DataStore $store
      */
     public function setStore(DataStore $store){
         $this->saveAll();
         $this->store = $store;
         if($this->flag < 2){
-            $this->warps = $this->loadWarps();
+            $this->mines = $this->loadMines();
         }
     }
 
+    /**
+     * @return MineReset
+     */
+    public function getApi(): MineReset{
+        return $this->api;
+    }
+
+    /**
+     * @return Mine[]
+     */
+    public function getMines(): array{
+        return $this->mines;
+    }
 }

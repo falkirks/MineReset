@@ -4,11 +4,6 @@ version: 3.0
 author: Falk
 api: [1.0.0, 2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4, 3.0.0-ALPHA5]
 load: POSTWORLD
-commands:
- mine:
-  description: "MineReset command"
-  usage: "/mine <create|set|list|reset|reset-all|destroy> <name> [parameters]"
-  permission: minereset.command
 permissions:
  minereset:
   default: op
