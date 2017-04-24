@@ -12,13 +12,15 @@ permissions:
     default: op
     description: Use MineReset commands
     children:
-     minereset.command.create:
-      description: Add new Mines
-     minereset.command.set:
-      description: Set existing mines
-     minereset.command.reset:
-      description: Reset mines
-     minereset.command.destroy:
-      description: Remove mines
-     minereset.command.reset-all:
-      description: Reset all mines
+      minereset.command.about:
+        description: Read the about text
+      minereset.command.create:
+        description: Add new Mines
+      minereset.command.set:
+        description: Set existing mines
+      minereset.command.reset:
+        description: Reset mines
+      minereset.command.destroy:
+        description: Remove mines
+      minereset.command.resetall:
+        description: Reset all mines

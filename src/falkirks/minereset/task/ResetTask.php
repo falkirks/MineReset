@@ -100,7 +100,7 @@ class ResetTask extends AsyncTask{
             if ($level instanceof Level) {
                 foreach ($chunks as $hash => $chunk) {
                     Level::getXZ($hash, $x, $z);
-                    $level->setChunk($x, $z, $chunk);
+                    $level->setChunk($x, $z, $chunk, !MineReset::supportsChunkSetting());
 
                 }
             }

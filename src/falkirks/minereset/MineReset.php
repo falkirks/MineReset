@@ -14,6 +14,7 @@ use falkirks\minereset\listener\CreationListener;
 use falkirks\minereset\listener\RegionBlockerListener;
 use falkirks\minereset\store\EntityStore;
 use falkirks\minereset\store\YAMLStore;
+use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 
@@ -34,11 +35,15 @@ class MineReset extends PluginBase{
     private $regionBlockerListener;
     /** @var  MineCommand */
     private $mainCommand;
+    /** @var  bool */
+    private static $supportsChunkSetting;
 
     /** @var  CreationListener */
     private $creationListener;
 
     public function onEnable(){
+        self::detectChunkSetting();
+
         @mkdir($this->getDataFolder());
 
         $this->mineManager = new MineManager($this, new YAMLStore(new Config($this->getDataFolder() . "mines.yml", Config::YAML, [])));
@@ -62,6 +67,11 @@ class MineReset extends PluginBase{
         $this->mainCommand->registerSubCommand("create", new CreateCommand($this));
         $this->mainCommand->registerSubCommand("reset", new ResetCommand($this));
         $this->mainCommand->registerSubCommand("reset-all", new ResetAllCommand($this));
+
+        if(!self::supportsChunkSetting()){
+            $this->getLogger()->warning("Your server does not support setting chunks without unloading them. This will cause tiles and entities to be lost when resetting mines. Upgrade to a newer pmmp to resolve this.");
+        }
+
     }
 
     public function onDisable(){
@@ -101,5 +111,22 @@ class MineReset extends PluginBase{
      */
     public function getRegionBlockerListener(): RegionBlockerListener{
         return $this->regionBlockerListener;
+    }
+
+    public static function supportsChunkSetting(): bool {
+        return static::$supportsChunkSetting;
+    }
+
+    private static function detectChunkSetting(){
+        $class = new \ReflectionClass(Level::class);
+        $func = $class->getMethod("setChunk");
+        $filename = $func->getFileName();
+        $start_line = $func->getStartLine() - 1;
+        $end_line = $func->getEndLine();
+        $length = $end_line - $start_line;
+
+        $source = file($filename);
+        $body = implode("", array_slice($source, $start_line, $length));
+        self::$supportsChunkSetting = strpos($body, 'removeEntity') !== false;
     }
 }
