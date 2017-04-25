@@ -144,4 +144,7 @@ class Mine{
         $this->isResetting = false;
     }
 
+    public function __toString(){
+        return $this->name;
+    }
 }

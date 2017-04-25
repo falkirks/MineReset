@@ -154,22 +154,12 @@ class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
             if(!$this->getApi()->getServer()->isLevelLoaded($array[7])){
                 $this->api->getLogger()->warning("A mine with the name " . TextFormat::AQUA . $name . TextFormat::RESET . " is connected to a level which is not loaded. You won't be able to use it until you load the level correctly.");
             }
-
-            if(is_array($array[6])) {
-                return new Mine($this,
-                    new Vector3(min($array[0], $array[1]), min($array[2], $array[3]), min($array[4], $array[5])),
-                    new Vector3(max($array[0], $array[1]), max($array[2], $array[3]), max($array[4], $array[5])),
-                    $array[7],
-                    $name,
-                    $array[6]);
-            }
-            else{
-                return new Mine($this,
-                    new Vector3(min($array[0], $array[1]), min($array[2], $array[3]), min($array[4], $array[5])),
-                    new Vector3(max($array[0], $array[1]), max($array[2], $array[3]), max($array[4], $array[5])),
-                    $array[7],
-                    $name);
-            }
+            return new Mine($this,
+                new Vector3(min($array[0], $array[1]), min($array[2], $array[3]), min($array[4], $array[5])),
+                new Vector3(max($array[0], $array[1]), max($array[2], $array[3]), max($array[4], $array[5])),
+                $array[7],
+                $name,
+                $array[6] ?? []);
         }
         $this->api->getLogger()->critical("A mine with the name " . TextFormat::AQUA . $name . TextFormat::RESET . " is incomplete. It will be removed automatically when your server stops.");
         return null;
