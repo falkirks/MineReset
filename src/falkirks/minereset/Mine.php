@@ -2,16 +2,21 @@
 namespace falkirks\minereset;
 
 use falkirks\minereset\task\ResetTask;
+use pocketmine\command\ConsoleCommandSender;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
+use pocketmine\scheduler\PluginTask;
 
 /**
  * Class Mine
+ *
+ * Programmer note: Mine objects have no state. They can be generated arbitrarily from serialized data.
+ *
  * @package falkirks\minereset\mine
  */
-class Mine{
+class Mine extends PluginTask {
     private $pointA;
     private $pointB;
     private $level;
@@ -19,7 +24,10 @@ class Mine{
     private $name;
     private $isResetting;
 
+    private $resetInterval;
+
     private $api;
+
 
     /**
      * Mine constructor.
@@ -29,16 +37,45 @@ class Mine{
      * @param string $level
      * @param string $name
      * @param array $data
+     * @param int $resetInterval
      */
-    public function __construct(MineManager $api, Vector3 $pointA, Vector3 $pointB, $level, string $name, array $data = []){
+    public function __construct(MineManager $api, Vector3 $pointA, Vector3 $pointB, $level, string $name, array $data = [], int $resetInterval = -1){
+        parent::__construct($api->getApi());
+
         $this->pointA = $pointA;
         $this->pointB = $pointB;
         $this->level = $level;
         $this->data = $data;
         $this->name = $name;
+        $this->resetInterval = $resetInterval;
         $this->api = $api;
 
         $this->isResetting = false;
+        $this->register();
+
+    }
+
+
+    /**
+     * INTERNAL USE ONLY
+     */
+    public function register(){
+        if($this->getHandler() === null && $this->resetInterval > 0){
+            $this->getApi()->getApi()->getServer()->getScheduler()->scheduleRepeatingTask($this, 20 * $this->resetInterval);
+        }
+    }
+
+    /**
+     * INTERNAL USE ONLY
+     */
+    public function destroy(){
+        if($this->getHandler() !== null) {
+            $this->getApi()->getApi()->getServer()->getScheduler()->cancelTask($this->getTaskId());
+        }
+    }
+
+    public function onRun($currentTick){
+        $this->reset();
     }
 
     /**
@@ -118,8 +155,12 @@ class Mine{
         return $this->isResetting;
     }
 
-    public function reset(){
-        if(!$this->isResetting() && $this->getLevel() !== null){
+    /**
+     * @param bool $force NOT TESTED
+     * @return bool
+     */
+    public function reset($force = false){
+        if((!$this->isResetting() || $force) && $this->getLevel() !== null){
             $this->isResetting = true;
 
             $chunks = [];
@@ -138,6 +179,22 @@ class Mine{
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return int
+     */
+    public function getResetInterval(): int{
+        return $this->resetInterval;
+    }
+
+    /**
+     * @param int $resetInterval
+     */
+    public function setResetInterval(int $resetInterval){
+        $this->resetInterval = $resetInterval;
+        $this->destroy();
+        $this->register();
     }
 
     public function doneReset(){

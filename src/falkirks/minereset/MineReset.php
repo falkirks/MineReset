@@ -14,6 +14,7 @@ use falkirks\minereset\listener\CreationListener;
 use falkirks\minereset\listener\RegionBlockerListener;
 use falkirks\minereset\store\EntityStore;
 use falkirks\minereset\store\YAMLStore;
+use falkirks\minereset\task\ScheduledResetTaskPool;
 use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
@@ -112,6 +113,7 @@ class MineReset extends PluginBase{
     public function getRegionBlockerListener(): RegionBlockerListener{
         return $this->regionBlockerListener;
     }
+
 
     public static function supportsChunkSetting(): bool {
         return static::$supportsChunkSetting;
