@@ -37,7 +37,7 @@ class MineReset extends PluginBase{
     /** @var  MineCommand */
     private $mainCommand;
     /** @var  bool */
-    private static $supportsChunkSetting;
+    private static $supportsChunkSetting = null;
 
     /** @var  CreationListener */
     private $creationListener;
@@ -60,14 +60,13 @@ class MineReset extends PluginBase{
         $this->mainCommand = new MineCommand($this);
         $this->getServer()->getCommandMap()->register("minereset", $this->mainCommand);
 
-        $this->mainCommand->registerSubCommand("about", new AboutCommand($this));
-        $this->mainCommand->registerSubCommand("list", new ListCommand($this));
-        $this->mainCommand->registerSubCommand("create", new CreateCommand($this));
-        $this->mainCommand->registerSubCommand("set", new SetCommand($this));
-        $this->mainCommand->registerSubCommand("destroy", new DestroyCommand($this));
-        $this->mainCommand->registerSubCommand("create", new CreateCommand($this));
-        $this->mainCommand->registerSubCommand("reset", new ResetCommand($this));
-        $this->mainCommand->registerSubCommand("reset-all", new ResetAllCommand($this));
+        $this->mainCommand->registerSubCommand("about", new AboutCommand($this), ['a']);
+        $this->mainCommand->registerSubCommand("list", new ListCommand($this), ['l']);
+        $this->mainCommand->registerSubCommand("create", new CreateCommand($this), ['c']);
+        $this->mainCommand->registerSubCommand("set", new SetCommand($this), ['s']);
+        $this->mainCommand->registerSubCommand("destroy", new DestroyCommand($this), ['d']);
+        $this->mainCommand->registerSubCommand("reset", new ResetCommand($this), ['r']);
+        $this->mainCommand->registerSubCommand("reset-all", new ResetAllCommand($this), ['ra']);
 
         if(!self::supportsChunkSetting()){
             $this->getLogger()->warning("Your server does not support setting chunks without unloading them. This will cause tiles and entities to be lost when resetting mines. Upgrade to a newer pmmp to resolve this.");
@@ -120,15 +119,17 @@ class MineReset extends PluginBase{
     }
 
     private static function detectChunkSetting(){
-        $class = new \ReflectionClass(Level::class);
-        $func = $class->getMethod("setChunk");
-        $filename = $func->getFileName();
-        $start_line = $func->getStartLine() - 1;
-        $end_line = $func->getEndLine();
-        $length = $end_line - $start_line;
+        if(self::$supportsChunkSetting === null) {
+            $class = new \ReflectionClass(Level::class);
+            $func = $class->getMethod("setChunk");
+            $filename = $func->getFileName();
+            $start_line = $func->getStartLine() - 1;
+            $end_line = $func->getEndLine();
+            $length = $end_line - $start_line;
 
-        $source = file($filename);
-        $body = implode("", array_slice($source, $start_line, $length));
-        self::$supportsChunkSetting = strpos($body, 'removeEntity') !== false;
+            $source = file($filename);
+            $body = implode("", array_slice($source, $start_line, $length));
+            self::$supportsChunkSetting = strpos($body, 'removeEntity') !== false;
+        }
     }
 }

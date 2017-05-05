@@ -43,7 +43,13 @@ class MineCommand extends Command implements PluginIdentifiableCommand {
         return $this->api;
     }
 
-    public function registerSubCommand(string $name, SubCommand $command){
+    public function registerSubCommand(string $name, SubCommand $command, $aliases = []){
         $this->subCommands[$name] = $command;
+
+        foreach ($aliases as $alias){
+            if(!isset($this->subCommands[$alias])){
+                $this->registerSubCommand($alias, $command);
+            }
+        }
     }
 }
