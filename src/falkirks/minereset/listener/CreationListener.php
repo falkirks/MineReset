@@ -35,7 +35,7 @@ class CreationListener implements Listener {
         $session = $this->getPlayerSession($event->getPlayer());
 
         if($session !== null){
-            if($session->getLevel() === null || $session->getLevel()->getId() === $event->getPlayer()->getId()) {
+            if($session->getLevel() === null || $session->getLevel()->getId() === $event->getPlayer()->getLevel()->getId()) {
                 $session->setNextPoint($event->getBlock());
                 $session->setLevel($event->getPlayer()->getPosition()->getLevel());
 
