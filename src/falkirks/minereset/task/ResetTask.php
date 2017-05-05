@@ -76,7 +76,9 @@ class ResetTask extends AsyncTask{
                                 $chunks[$hash]->setBlock($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l][0] & 0xff, $id[$l][1] & 0xff);
                                 $currentBlocks++;
                                 if($lastUpdate + $interval <= $currentBlocks){
-                                    $this->publishProgress(round(($currentBlocks / $totalBlocks)*100) . "%");
+                                    if(method_exists($this, 'publishProgress')) {
+                                        $this->publishProgress(round(($currentBlocks / $totalBlocks) * 100) . "%");
+                                    }
                                     $lastUpdate = $currentBlocks;
                                 }
 
