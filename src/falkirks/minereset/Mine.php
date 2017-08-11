@@ -74,7 +74,7 @@ class Mine extends PluginTask {
         }
     }
 
-    public function onRun($currentTick){
+    public function onRun(int $currentTick){
         $this->reset();
     }
 
