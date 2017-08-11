@@ -26,7 +26,7 @@ class MineCommand extends Command implements PluginIdentifiableCommand {
      *
      * @return mixed
      */
-    public function execute(CommandSender $sender, $commandLabel, array $args){
+    public function execute(CommandSender $sender, string $commandLabel, array $args){
         if(count($args) > 0 && array_key_exists($args[0], $this->subCommands)){
             return $this->subCommands[array_shift($args)]->execute($sender, $commandLabel, $args);
         }
