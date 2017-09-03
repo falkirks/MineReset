@@ -48,7 +48,8 @@ class ResetTask extends AsyncTask{
         }
         $sum = [];
         $id = array_keys(unserialize($this->ratioData));
-        for($i = 0; $i < count($id); $i++){
+
+        foreach($id as $i => $blockId){
             $blockId = explode(":", $id[$i]);
             if(!isset($blockId[1])){
                 $blockId[1] = 0;
@@ -57,19 +58,21 @@ class ResetTask extends AsyncTask{
         }
         $m = array_values(unserialize($this->ratioData));
         $sum[0] = $m[0];
-        for ($l = 1; $l < count($m); $l++)
+        for ($l = 1, $mCount = count($m); $l < $mCount; $l++)
             $sum[$l] = $sum[$l - 1] + $m[$l];
+
+        $sumCount = count($sum);
 
         $totalBlocks = ($this->b->x - $this->a->x + 1)*($this->b->y - $this->a->y + 1)*($this->b->z - $this->a->z + 1);
         $interval = $totalBlocks / 8; //TODO determine the interval programmatically
         $lastUpdate = 0;
         $currentBlocks = 0;
 
-        for ($x = $this->a->getX(); $x <= $this->b->getX(); $x++) {
-            for ($y = $this->a->getY(); $y <= $this->b->getY(); $y++) {
-                for ($z = $this->a->getZ(); $z <= $this->b->getZ(); $z++) {
+        for ($x = $this->a->getX(), $x2 = $this->b->getX(); $x <= $x2; $x++) {
+            for ($y = $this->a->getY(), $y2 = $this->b->getY(); $y <= $y2; $y++) {
+                for ($z = $this->a->getZ(), $z2 = $this->b->getZ(); $z <= $z2; $z++) {
                     $a = rand(0, end($sum));
-                    for ($l = 0; $l < count($sum); $l++) {
+                    for ($l = 0; $l < $sumCount; $l++) {
                         if ($a <= $sum[$l]) {
                             $hash = Level::chunkHash($x >> 4, $z >> 4);
                             if(isset($chunks[$hash])){
@@ -83,7 +86,7 @@ class ResetTask extends AsyncTask{
                                 }
 
                             }
-                            $l = count($sum);
+                            $l = $sumCount;
                         }
                     }
                 }
