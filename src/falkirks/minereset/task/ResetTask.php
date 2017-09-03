@@ -41,7 +41,7 @@ class ResetTask extends AsyncTask{
      */
     public function onRun(){
         $chunkClass = $this->chunkClass;
-        /** @var  Chunk[] $chunks */
+        /** @var Chunk[] $chunks */
         $chunks = unserialize($this->chunks);
         foreach($chunks as $hash => $binary){
             $chunks[$hash] = $chunkClass::fastDeserialize($binary);
@@ -68,25 +68,54 @@ class ResetTask extends AsyncTask{
         $lastUpdate = 0;
         $currentBlocks = 0;
 
+        $currentChunkX = $this->a->x >> 4;
+        $currentChunkZ = $this->a->z >> 4;
+
+        $currentChunkY = $this->a->y >> 4;
+
+        $currentChunk = null;
+        $currentSubChunk = null;
+
         for ($x = $this->a->getX(), $x2 = $this->b->getX(); $x <= $x2; $x++) {
-            for ($y = $this->a->getY(), $y2 = $this->b->getY(); $y <= $y2; $y++) {
-                for ($z = $this->a->getZ(), $z2 = $this->b->getZ(); $z <= $z2; $z++) {
+            $chunkX = $x >> 4;
+            for ($z = $this->a->getZ(), $z2 = $this->b->getZ(); $z <= $z2; $z++) {
+                $chunkZ = $z >> 4;
+                if($currentChunk === null or $chunkX !== $currentChunkX or $chunkZ !== $currentChunkZ){
+                    $currentChunkX = $chunkX;
+                    $currentChunkZ = $chunkZ;
+
+                    $hash = Level::chunkHash($chunkX, $chunkZ);
+                    $currentChunk = $chunks[$hash];
+                    if($currentChunk === null){
+                        continue;
+                    }
+                }
+
+                for ($y = $this->a->getY(), $y2 = $this->b->getY(); $y <= $y2; $y++) {
+                    $chunkY = $y >> 4;
+
+                    if($currentSubChunk === null or $chunkY !== $currentChunkY){
+                        $currentChunkY = $chunkY;
+
+                        $currentSubChunk = $currentChunk->getSubChunk($chunkY, true);
+                        if($currentSubChunk === null){
+                            continue;
+                        }
+                    }
+
                     $a = rand(0, end($sum));
                     for ($l = 0; $l < $sumCount; $l++) {
                         if ($a <= $sum[$l]) {
-                            $hash = Level::chunkHash($x >> 4, $z >> 4);
-                            if(isset($chunks[$hash])){
-                                $chunks[$hash]->setBlock($x & 0x0f, $y & 0x7f, $z & 0x0f, $id[$l][0] & 0xff, $id[$l][1] & 0xff);
-                                $currentBlocks++;
-                                if($lastUpdate + $interval <= $currentBlocks){
-                                    if(method_exists($this, 'publishProgress')) {
-                                        $this->publishProgress(round(($currentBlocks / $totalBlocks) * 100) . "%");
-                                    }
-                                    $lastUpdate = $currentBlocks;
+                            $currentSubChunk->setBlock($x & 0x0f, $y & 0x0f, $z & 0x0f, $id[$l][0] & 0xff, $id[$l][1] & 0xff);
+                            $currentBlocks++;
+                            if($lastUpdate + $interval <= $currentBlocks){
+                                if(method_exists($this, 'publishProgress')) {
+                                    $this->publishProgress(round(($currentBlocks / $totalBlocks) * 100) . "%");
                                 }
-
+                                $lastUpdate = $currentBlocks;
                             }
-                            $l = $sumCount;
+
+                            break;
                         }
                     }
                 }
