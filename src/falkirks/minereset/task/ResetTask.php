@@ -87,6 +87,7 @@ class ResetTask extends AsyncTask{
                 if($currentChunk === null or $chunkX !== $currentChunkX or $chunkZ !== $currentChunkZ){
                     $currentChunkX = $chunkX;
                     $currentChunkZ = $chunkZ;
+                    $currentSubChunk = null;
 
                     $hash = Level::chunkHash($chunkX, $chunkZ);
                     $currentChunk = $chunks[$hash];
