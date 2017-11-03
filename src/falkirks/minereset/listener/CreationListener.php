@@ -32,6 +32,10 @@ class CreationListener implements Listener {
      * @param PlayerInteractEvent $event
      */
     public function onBlockTap(PlayerInteractEvent $event){
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK){
+            return;
+        }
+
         $session = $this->getPlayerSession($event->getPlayer());
 
         if($session !== null){
