@@ -2,6 +2,8 @@
 namespace falkirks\minereset\task;
 
 use falkirks\minereset\MineReset;
+use falkirks\minereset\util\BlockStringParser;
+use pocketmine\block\Block;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
@@ -25,6 +27,8 @@ class ResetTask extends AsyncTask{
     /** @var Chunk $chunkClass */
     private $chunkClass;
 
+    private $parserClass;
+
     public function __construct(string $name, array $chunks, Vector3 $a, Vector3 $b, array $data, $levelId, $chunkClass){
         $this->name = $name;
         $this->chunks = serialize($chunks);
@@ -33,6 +37,7 @@ class ResetTask extends AsyncTask{
         $this->ratioData = serialize($data);
         $this->levelId = $levelId;
         $this->chunkClass = $chunkClass;
+        $this->parserClass = BlockStringParser::class;
     }
     /**
      * Actions to execute when run
@@ -47,15 +52,8 @@ class ResetTask extends AsyncTask{
             $chunks[$hash] = $chunkClass::fastDeserialize($binary);
         }
         $sum = [];
-        $id = array_keys(unserialize($this->ratioData));
+        $id = array_map([$this->parserClass, "parse"], array_keys(unserialize($this->ratioData)));
 
-        foreach($id as $i => $blockId){
-            $blockId = explode(":", $id[$i]);
-            if(!isset($blockId[1])){
-                $blockId[1] = 0;
-            }
-            $id[$i] = $blockId;
-        }
         $m = array_values(unserialize($this->ratioData));
         $sum[0] = $m[0];
         for ($l = 1, $mCount = count($m); $l < $mCount; $l++)

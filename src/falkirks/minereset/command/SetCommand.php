@@ -3,6 +3,7 @@ namespace falkirks\minereset\command;
 
 
 use falkirks\minereset\Mine;
+use falkirks\minereset\util\BlockStringParser;
 use pocketmine\command\CommandSender;
 use pocketmine\utils\TextFormat;
 
@@ -15,8 +16,7 @@ class SetCommand extends SubCommand{
                         $sets = array_slice($args, 1);
                         $save = [];
 
-                        if(array_reduce($sets, function ($carry, $curr){ return $carry && is_numeric($curr); }, true)) {
-
+                        if(array_reduce($sets, function ($carry, $curr){ return $carry && BlockStringParser::isValid($curr); }, true)) { //FIXME Allows bad ordering by treating every input as block string
                             if (count($sets) % 2 === 0) {
                                 $total = 0;
                                 foreach ($sets as $key => $item) {

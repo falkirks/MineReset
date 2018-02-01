@@ -2,6 +2,7 @@
 namespace falkirks\minereset;
 
 use falkirks\minereset\task\ResetTask;
+use falkirks\minereset\util\BlockStringParser;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
@@ -64,7 +65,7 @@ class Mine extends PluginTask {
 
     public function isValid() : bool {
         foreach ($this->data as $id => $percent){
-            if(!is_numeric($id) || !is_numeric($percent)){
+            if(!BlockStringParser::isValid($id) || !is_numeric($percent)){
                 return false;
             }
         }
