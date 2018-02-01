@@ -12,7 +12,7 @@ class ResetAllCommand extends SubCommand{
             $success = 0;
             foreach ($this->getApi()->getMineManager() as $mine) {
                 if ($mine instanceof Mine) {
-                    if ($mine->reset()) {
+                    if ($mine->reset()) { // Only reset if valid
                         $success++;
                         $this->getApi()->getResetProgressManager()->addObserver($mine->getName(), $sender);
                     }

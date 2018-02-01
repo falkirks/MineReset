@@ -9,9 +9,18 @@ use pocketmine\utils\TextFormat;
 class ListCommand extends SubCommand{
     public function execute(CommandSender $sender, $commandLabel, array $args){
         if($sender->hasPermission("minereset.command.list")) {
+            $sender->sendMessage("---- Mines ----");
             foreach ($this->getApi()->getMineManager() as $mine) {
                 if ($mine instanceof Mine) {
-                    $sender->sendMessage($mine->getName());
+                    if(!$mine->isValid()){
+                        $sender->sendMessage("* " . TextFormat::RED . $mine . TextFormat::RESET);
+                    }
+                    else if($mine->isResetting()){
+                        $sender->sendMessage("* " . TextFormat::BLUE . $mine . TextFormat::RESET);
+                    }
+                    else {
+                        $sender->sendMessage("* " . $mine);
+                    }
                 }
             }
         }

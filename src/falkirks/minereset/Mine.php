@@ -51,8 +51,24 @@ class Mine extends PluginTask {
         $this->api = $api;
 
         $this->isResetting = false;
-        $this->register();
 
+
+        if($this->isValid()) {
+            $this->register();
+        }
+        else{
+            $api->getApi()->getLogger()->warning("MineReset has detected corruption of the mines.yml file in mine with name {$this->name}, MineReset will not reset this mine.");
+        }
+
+    }
+
+    public function isValid() : bool {
+        foreach ($this->data as $id => $percent){
+            if(!is_numeric($id) || !is_numeric($percent)){
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -160,7 +176,7 @@ class Mine extends PluginTask {
      * @return bool
      */
     public function reset($force = false){
-        if((!$this->isResetting() || $force) && $this->getLevel() !== null){
+        if((!$this->isResetting() || $force) && $this->getLevel() !== null && $this->isValid()){
             $this->isResetting = true;
 
             $chunks = [];
