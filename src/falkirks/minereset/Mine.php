@@ -17,7 +17,7 @@ use pocketmine\scheduler\PluginTask;
  *
  * @package falkirks\minereset\mine
  */
-class Mine extends PluginTask {
+class Mine extends PluginTask implements \JsonSerializable {
     private $pointA;
     private $pointB;
     private $level;
@@ -221,4 +221,20 @@ class Mine extends PluginTask {
     public function __toString(){
         return $this->name;
     }
+
+    // This is only used for debugging
+    public function jsonSerialize(){
+        return [
+            'name' => $this->name,
+            'pointA' => [$this->pointA->getX(), $this->pointA->getY(), $this->pointA->getZ()],
+            'pointB' => [$this->pointB->getX(), $this->pointB->getY(), $this->pointB->getZ()],
+            'level' => $this->level,
+            'isLevelLoaded' => $this->api->getApi()->getServer()->getLevelByName($this->level) !== null,
+            'data' => $this->data,
+            'isResetting' => $this->isResetting,
+            'resetInterval' => $this->resetInterval
+        ];
+    }
+
+
 }

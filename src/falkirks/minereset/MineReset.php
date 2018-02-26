@@ -7,6 +7,7 @@ use falkirks\minereset\command\CreateCommand;
 use falkirks\minereset\command\DestroyCommand;
 use falkirks\minereset\command\ListCommand;
 use falkirks\minereset\command\MineCommand;
+use falkirks\minereset\command\ReportCommand;
 use falkirks\minereset\command\ResetAllCommand;
 use falkirks\minereset\command\ResetCommand;
 use falkirks\minereset\command\SetCommand;
@@ -15,6 +16,7 @@ use falkirks\minereset\listener\RegionBlockerListener;
 use falkirks\minereset\store\EntityStore;
 use falkirks\minereset\store\YAMLStore;
 use falkirks\minereset\task\ScheduledResetTaskPool;
+use falkirks\minereset\util\DebugDumpFactory;
 use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
@@ -36,6 +38,9 @@ class MineReset extends PluginBase{
     private $regionBlockerListener;
     /** @var  MineCommand */
     private $mainCommand;
+    /** @var DebugDumpFactory */
+    private $debugDumpFactory;
+
     /** @var  bool */
     private static $supportsChunkSetting = null;
 
@@ -46,6 +51,8 @@ class MineReset extends PluginBase{
         self::detectChunkSetting();
 
         @mkdir($this->getDataFolder());
+
+        $this->debugDumpFactory = new DebugDumpFactory($this);
 
         $this->mineManager = new MineManager($this, new YAMLStore(new Config($this->getDataFolder() . "mines.yml", Config::YAML, [])));
 
@@ -61,6 +68,7 @@ class MineReset extends PluginBase{
         $this->getServer()->getCommandMap()->register("minereset", $this->mainCommand);
 
         $this->mainCommand->registerSubCommand("about", new AboutCommand($this), ['a']);
+        $this->mainCommand->registerSubCommand("report", new ReportCommand($this), []);
         $this->mainCommand->registerSubCommand("list", new ListCommand($this), ['l']);
         $this->mainCommand->registerSubCommand("create", new CreateCommand($this), ['c']);
         $this->mainCommand->registerSubCommand("set", new SetCommand($this), ['s']);
@@ -112,6 +120,15 @@ class MineReset extends PluginBase{
     public function getRegionBlockerListener(): RegionBlockerListener{
         return $this->regionBlockerListener;
     }
+
+    /**
+     * @return DebugDumpFactory
+     */
+    public function getDebugDumpFactory(): DebugDumpFactory{
+        return $this->debugDumpFactory;
+    }
+
+
 
 
     public static function supportsChunkSetting(): bool {
