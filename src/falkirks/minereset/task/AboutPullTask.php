@@ -16,7 +16,7 @@ class AboutPullTask extends AsyncTask {
      * @param CommandSender $sender
      */
     public function __construct(CommandSender $sender){
-        parent::__construct($sender);
+        $this->storeLocal($sender);
     }
 
 
@@ -25,13 +25,12 @@ class AboutPullTask extends AsyncTask {
     }
 
     public function onCompletion(Server $server){
-        $sender = $this->fetchLocal($server);
-        if($sender instanceof CommandSender){
+        $sender = $this->fetchLocal();
+        if($sender instanceof CommandSender) {
             $result = $this->getResult();
-            if($result !== false){
+            if ($result !== false) {
                 $sender->sendMessage($this->getResult());
-            }
-            else{
+            } else {
                 $sender->sendMessage("MineReset by Falkirks. This is a fancy plugin that allows you to make resettable mines.");
             }
         }

@@ -10,7 +10,7 @@ use pocketmine\utils\TextFormat;
 class AboutCommand extends SubCommand{
     public function execute(CommandSender $sender, $commandLabel, array $args){
         if($sender->hasPermission("minereset.command.about")) {
-            $this->getApi()->getServer()->getScheduler()->scheduleAsyncTask(new AboutPullTask($sender));
+            $this->getApi()->getServer()->getAsyncPool()->submitTask(new AboutPullTask($sender));
         }
         else{
             $sender->sendMessage(TextFormat::RED . "You do not have permission to run this command." . TextFormat::RESET);

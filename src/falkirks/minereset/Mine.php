@@ -3,12 +3,11 @@ namespace falkirks\minereset;
 
 use falkirks\minereset\task\ResetTask;
 use falkirks\minereset\util\BlockStringParser;
-use pocketmine\command\ConsoleCommandSender;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
-use pocketmine\scheduler\PluginTask;
+use pocketmine\scheduler\Task;
 
 /**
  * Class Mine
@@ -17,7 +16,7 @@ use pocketmine\scheduler\PluginTask;
  *
  * @package falkirks\minereset\mine
  */
-class Mine extends PluginTask implements \JsonSerializable {
+class Mine extends Task implements \JsonSerializable {
     private $pointA;
     private $pointB;
     private $level;
@@ -41,8 +40,6 @@ class Mine extends PluginTask implements \JsonSerializable {
      * @param int $resetInterval
      */
     public function __construct(MineManager $api, Vector3 $pointA, Vector3 $pointB, $level, string $name, array $data = [], int $resetInterval = -1){
-        parent::__construct($api->getApi());
-
         $this->pointA = $pointA;
         $this->pointB = $pointB;
         $this->level = $level;
@@ -78,7 +75,7 @@ class Mine extends PluginTask implements \JsonSerializable {
      */
     public function register(){
         if($this->getHandler() === null && $this->resetInterval > 0){
-            $this->getApi()->getApi()->getServer()->getScheduler()->scheduleRepeatingTask($this, 20 * $this->resetInterval);
+            $this->getApi()->getApi()->getScheduler()->scheduleRepeatingTask($this, 20 * $this->resetInterval);
         }
     }
 
@@ -87,7 +84,7 @@ class Mine extends PluginTask implements \JsonSerializable {
      */
     public function destroy(){
         if($this->getHandler() !== null) {
-            $this->getApi()->getApi()->getServer()->getScheduler()->cancelTask($this->getTaskId());
+            $this->getApi()->getApi()->getScheduler()->cancelTask($this->getTaskId());
         }
     }
 
@@ -192,7 +189,7 @@ class Mine extends PluginTask implements \JsonSerializable {
             }
 
             $resetTask = new ResetTask($this->getName(), $chunks, $this->getPointA(), $this->getPointB(), $this->data, $this->getLevel()->getId(), $chunkClass);
-            $this->getApi()->getApi()->getServer()->getScheduler()->scheduleAsyncTask($resetTask);
+            $this->getApi()->getApi()->getServer()->getAsyncPool()->submitTask($resetTask);
             return true;
         }
         return false;
