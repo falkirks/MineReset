@@ -20,11 +20,11 @@ class AboutPullTask extends AsyncTask {
     }
 
 
-    public function onRun(){
+    public function onRun() : void {
         $this->setResult(Utils::getURL(AboutPullTask::ABOUT_URL));
     }
 
-    public function onCompletion(Server $server){
+    public function onCompletion(Server $server) : void {
         $sender = $this->fetchLocal();
         if($sender instanceof CommandSender) {
             $result = $this->getResult();
