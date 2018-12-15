@@ -5,6 +5,7 @@ namespace falkirks\minereset\task;
 use pocketmine\command\CommandSender;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
+use pocketmine\utils\Internet;
 use pocketmine\utils\Utils;
 
 class AboutPullTask extends AsyncTask {
@@ -21,10 +22,16 @@ class AboutPullTask extends AsyncTask {
 
 
     public function onRun() : void {
-        $this->setResult(Utils::getURL(AboutPullTask::ABOUT_URL));
+        if(method_exists(Utils::class, "getURL")){
+            $this->setResult(Utils::getURL(AboutPullTask::ABOUT_URL));
+        }
+        else {
+            $this->setResult(Internet::getURL(AboutPullTask::ABOUT_URL));
+        }
+
     }
 
-    public function onCompletion(Server $server) : void {
+    public function onCompletion(Server $server = null) : void {
         $sender = $this->fetchLocal();
         if($sender instanceof CommandSender) {
             $result = $this->getResult();

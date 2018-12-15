@@ -129,7 +129,10 @@ class ResetTask extends AsyncTask{
     /**
      * @param Server $server
      */
-    public function onCompletion(Server $server) : void {
+    public function onCompletion(Server $server = null) : void {
+        if($server === null){
+            $server = Server::getInstance();
+        }
         $chunks = $this->getResult();
         $plugin = $server->getPluginManager()->getPlugin("MineReset");
         if($plugin instanceof MineReset and $plugin->isEnabled()) {
@@ -147,10 +150,14 @@ class ResetTask extends AsyncTask{
     }
 
     /**
-     * @param Server $server
+     * @param mixed $server
      * @param mixed $progress
      */
-    public function onProgressUpdate(Server $server, $progress){
+    public function onProgressUpdate($server, $progress = null): void {
+        if($progress === null){
+            $progress = $server;
+            $server = Server::getInstance();
+        }
         $plugin = $server->getPluginManager()->getPlugin("MineReset");
         if($plugin instanceof MineReset and $plugin->isEnabled()) {
             $plugin->getResetProgressManager()->notifyProgress($progress, $this->name);
