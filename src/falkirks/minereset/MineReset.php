@@ -13,6 +13,7 @@ use falkirks\minereset\command\ResetCommand;
 use falkirks\minereset\command\SetCommand;
 use falkirks\minereset\listener\CreationListener;
 use falkirks\minereset\listener\RegionBlockerListener;
+use falkirks\minereset\store\ConfigStore;
 use falkirks\minereset\store\EntityStore;
 use falkirks\minereset\store\YAMLStore;
 use falkirks\minereset\task\ScheduledResetTaskPool;
@@ -54,7 +55,7 @@ class MineReset extends PluginBase{
 
         $this->debugDumpFactory = new DebugDumpFactory($this);
 
-        $this->mineManager = new MineManager($this, new YAMLStore(new Config($this->getDataFolder() . "mines.yml", Config::YAML, [])));
+        $this->mineManager = new MineManager($this, new ConfigStore(new Config($this->getDataFolder() . "mines.json", Config::JSON, [])));
 
         $this->resetProgressManager = new ResetProgressManager($this);
 

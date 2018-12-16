@@ -2,10 +2,14 @@
 namespace falkirks\minereset;
 
 
+use falkirks\minereset\exception\JsonFieldMissingException;
+use falkirks\minereset\store\ConfigStore;
 use falkirks\minereset\store\DataStore;
 use falkirks\minereset\store\Reloadable;
 use falkirks\minereset\store\Saveable;
 use pocketmine\math\Vector3;
+use pocketmine\utils\Color;
+use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 
 class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
@@ -25,9 +29,27 @@ class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
         $this->store = $store;
         $this->flag = $flag;
         $this->mines = [];
+        if(file_exists($api->getDataFolder() . "mines.yml")){
+            rename($api->getDataFolder() . "mines.yml", $api->getDataFolder() . "_minesOLD.yml");
+            $api->getLogger()->info("MineReset is upgrading your old mines.yml to the newest config version");
+            $api->getLogger()->info("A backup of your old file will be placed at " . TextFormat::BLACK . "_minesOLD.yml" . TextFormat::RESET);
+            $this->triggerConfigUpdate();
+
+        }
         if($this->flag < 2){
             $this->mines = $this->loadMines();
         }
+    }
+
+    private function triggerConfigUpdate(){
+        $store = new ConfigStore(new Config($this->getApi()->getDataFolder() . "_minesOLD.yml", Config::YAML));
+        foreach($store->getIterator() as $name => $data){
+            $this->mines[$name] = $this->mineFromData($name, $data);
+        }
+        foreach($this->mines as $mine){
+            $this->store->add($mine->getName(), $mine);
+        }
+        $this->saveStore(true);
     }
     /**
      * @deprecated
@@ -45,7 +67,13 @@ class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
     protected function loadMines(): array{
         $out = [];
         foreach($this->store->getIterator() as $name => $data){
-            $out[$name] = $this->mineFromData($name, $data);
+            try {
+                $out[$name] = Mine::fromJson($this, $data, $name);
+            }
+            catch(JsonFieldMissingException $e){
+                $this->getApi()->getLogger()->warning("Mine with name " . $name . " is missing data in save file. Will be deleted on next save.");
+            }
+            //$out[$name] = $this->mineFromData($name, $data);
         }
         return $out;
     }
@@ -58,7 +86,7 @@ class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
         if($this->flag === 0){
             $this->store->clear();
             foreach($this->mines as $mine){
-                $this->store->add($mine->getName(), $this->mineToData($mine));
+                $this->store->add($mine->getName(), $mine);
             }
             $this->saveStore(true);
         }
@@ -147,6 +175,7 @@ class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
      * @param array $array
      * @return Mine
      * @throws \Exception
+     * @DEPRECATED
      */
     protected function mineFromData($name, array $array){
         if(count($array) === 9 || count($array) === 8) {
@@ -170,6 +199,7 @@ class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
      * use $warp->getName()
      * @param Mine $mine
      * @return array
+     * @DEPRECATED
      */
     protected function mineToData(Mine $mine){
         return  [

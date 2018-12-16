@@ -1,6 +1,7 @@
 <?php
 namespace falkirks\minereset;
 
+use falkirks\minereset\exception\JsonFieldMissingException;
 use falkirks\minereset\task\ResetTask;
 use falkirks\minereset\util\BlockStringParser;
 use pocketmine\level\format\Chunk;
@@ -226,12 +227,23 @@ class Mine extends Task implements \JsonSerializable {
             'pointA' => [$this->pointA->getX(), $this->pointA->getY(), $this->pointA->getZ()],
             'pointB' => [$this->pointB->getX(), $this->pointB->getY(), $this->pointB->getZ()],
             'level' => $this->level,
-            'isLevelLoaded' => $this->api->getApi()->getServer()->getLevelByName($this->level) !== null,
             'data' => $this->data,
-            'isResetting' => $this->isResetting,
             'resetInterval' => $this->resetInterval
         ];
     }
 
-
+    /**
+     * @param MineManager $manager
+     * @param $json
+     * @param $name
+     * @return Mine
+     * @throws JsonFieldMissingException
+     */
+    public static function fromJson(MineManager $manager, $json, $name): Mine{
+        if(isset($json['pointA']) && isset($json['pointB']) && isset($json['level']) && isset($json['data'])){
+            $a = new Mine($manager, new Vector3(...$json['pointA']), new Vector3(...$json['pointB']), $json['level'], $name, $json['data'], $json['resetInterval'] ?? -1);
+            return $a;
+        }
+        throw new JsonFieldMissingException();
+    }
 }

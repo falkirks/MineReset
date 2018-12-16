@@ -4,10 +4,10 @@ namespace falkirks\minereset\store;
 use pocketmine\utils\Config;
 
 /**
- * Class YAMLStore
+ * Class ConfigStore
  * @package falkirks\minereset\store
  */
-class YAMLStore extends AbstractStore implements Saveable, Reloadable{
+class ConfigStore extends AbstractStore implements Saveable, Reloadable{
     /** @var Config  */
     private $config;
 
