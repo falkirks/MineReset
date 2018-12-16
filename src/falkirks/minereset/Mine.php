@@ -25,7 +25,9 @@ class Mine extends Task implements \JsonSerializable {
     private $name;
     private $isResetting;
 
+
     private $resetInterval;
+    private $warpName;
 
     private $api;
 
@@ -35,18 +37,27 @@ class Mine extends Task implements \JsonSerializable {
      * @param MineManager $api
      * @param Vector3 $pointA
      * @param Vector3 $pointB
-     * @param string $level
+     * @param string $levelName
      * @param string $name
      * @param array $data
      * @param int $resetInterval
+     * @param string $warpName
      */
-    public function __construct(MineManager $api, Vector3 $pointA, Vector3 $pointB, $level, string $name, array $data = [], int $resetInterval = -1){
+    public function __construct(MineManager $api,
+                                Vector3 $pointA,
+                                Vector3 $pointB,
+                                string $levelName,
+                                string $name,
+                                array $data = [],
+                                int $resetInterval = -1,
+                                string $warpName = ""){
         $this->pointA = $pointA;
         $this->pointB = $pointB;
-        $this->level = $level;
+        $this->level = $levelName;
         $this->data = $data;
         $this->name = $name;
         $this->resetInterval = $resetInterval;
+        $this->warpName = $warpName;
         $this->api = $api;
 
         $this->isResetting = false;
@@ -170,6 +181,14 @@ class Mine extends Task implements \JsonSerializable {
         return $this->isResetting;
     }
 
+    public function hasWarp(){
+        return $this->warpName !== "";
+    }
+
+    public function getWarpName(){
+        return $this->warpName;
+    }
+
     /**
      * @param bool $force NOT TESTED
      * @return bool
@@ -228,7 +247,8 @@ class Mine extends Task implements \JsonSerializable {
             'pointB' => [$this->pointB->getX(), $this->pointB->getY(), $this->pointB->getZ()],
             'level' => $this->level,
             'data' => $this->data,
-            'resetInterval' => $this->resetInterval
+            'resetInterval' => $this->resetInterval,
+            'warpName' => $this->warpName
         ];
     }
 
@@ -241,7 +261,14 @@ class Mine extends Task implements \JsonSerializable {
      */
     public static function fromJson(MineManager $manager, $json, $name): Mine{
         if(isset($json['pointA']) && isset($json['pointB']) && isset($json['level']) && isset($json['data'])){
-            $a = new Mine($manager, new Vector3(...$json['pointA']), new Vector3(...$json['pointB']), $json['level'], $name, $json['data'], $json['resetInterval'] ?? -1);
+            $a = new Mine($manager,
+                new Vector3(...$json['pointA']),
+                new Vector3(...$json['pointB']),
+                $json['level'],
+                $name,
+                $json['data'],
+                $json['resetInterval'] ?? -1,
+                $json['warpName'] ?? "");
             return $a;
         }
         throw new JsonFieldMissingException();

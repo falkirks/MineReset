@@ -4,6 +4,7 @@ version: 3.3.0
 author: Falk
 api: [3.0.0, 4.0.0]
 load: POSTWORLD
+softdepend: [SimpleWarp]
 permissions:
  minereset:
   default: op

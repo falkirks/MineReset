@@ -4,11 +4,13 @@ namespace falkirks\minereset\listener;
 
 use falkirks\minereset\Mine;
 use falkirks\minereset\MineReset;
+use falkirks\simplewarp\SimpleWarp;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\level\Position;
+use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
 class RegionBlockerListener implements Listener {
@@ -23,6 +25,16 @@ class RegionBlockerListener implements Listener {
         $this->api = $api;
     }
 
+    public function teleportPlayer(Player $player, Mine $mine){
+
+        $swarp = $this->getApi()->getServer()->getPluginManager()->getPlugin('SimpleWarp');
+        if($mine->hasWarp() && $swarp instanceof SimpleWarp){
+            $swarp->getApi()->warpPlayerTo($player, $mine->getWarpName());
+        } else {
+            $player->teleport($player->getLevel()->getSafeSpawn($player->getPosition()));
+        }
+    }
+
 
     public function clearMine(string $mineName){
         /** @var Mine $mine */
@@ -30,7 +42,7 @@ class RegionBlockerListener implements Listener {
         if($mine !== null){
             foreach ($this->getApi()->getServer()->getOnlinePlayers() as $player){
                 if($mine->isPointInside($player->getPosition())){
-                    $player->teleport($player->getLevel()->getSafeSpawn($player->getPosition()));
+                    $this->teleportPlayer($player, $mine);
                     $player->sendMessage("You have teleported to escape a resetting mine.");
                 }
             }
