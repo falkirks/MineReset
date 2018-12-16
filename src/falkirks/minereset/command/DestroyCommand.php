@@ -4,7 +4,9 @@ namespace falkirks\minereset\command;
 
 use falkirks\minereset\Mine;
 use falkirks\minereset\MineReset;
+use Frago9876543210\EasyForms\forms\ModalForm;
 use pocketmine\command\CommandSender;
+use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
 class DestroyCommand extends SubCommand{
@@ -31,15 +33,31 @@ class DestroyCommand extends SubCommand{
         $this->senders = [];
     }
 
+    public function doDelete($name, CommandSender $sender){
+        unset($this->getApi()->getMineManager()[$name]);
+        unset($this->senders[$sender->getName()]);
+        $sender->sendMessage("{$name[0]} has been destroyed.");
+    }
+
 
     public function execute(CommandSender $sender, $commandLabel, array $args){
         if($sender->hasPermission("minereset.command.destroy")) {
             if (isset($args[0])) {
                 if (isset($this->getApi()->getMineManager()[$args[0]])) {
-                    if (isset($args[1]) && isset($this->senders[$sender->getName()]) && $this->senders[$sender->getName()] === $args[1]) {
-                        unset($this->getApi()->getMineManager()[$args[0]]);
-                        unset($this->senders[$sender->getName()]);
-                        $sender->sendMessage("{$args[0]} has been destroyed.");
+                    if($sender instanceof Player && $this->formsSupported()){
+                        $form = new class("Are you sure?", "You are about to delete the mine called {$args[0]}.") extends ModalForm {
+                            public function onSubmit(Player $player, $response) : void{
+                                if($response){
+                                    $this->parent->doDelete($this->name, $player);
+                                }
+                            }
+                        };
+                        $form->parent = $this;
+                        $form->name = $args[0];
+                        $sender->sendForm($form);
+                    }
+                    else if (isset($args[1]) && isset($this->senders[$sender->getName()]) && $this->senders[$sender->getName()] === $args[1]) {
+                        $this->doDelete($args[0], $sender);
                     } else {
                         $str = DestroyCommand::DESTROY_STRINGS[$this->offset];
                         $sender->sendMessage("Run: " . TextFormat::AQUA . "/mine destroy {$args[0]} $str" . TextFormat::RESET);

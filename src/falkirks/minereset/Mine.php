@@ -239,7 +239,6 @@ class Mine extends Task implements \JsonSerializable {
         return $this->name;
     }
 
-    // This is only used for debugging
     public function jsonSerialize(){
         return [
             'name' => $this->name,

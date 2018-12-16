@@ -139,7 +139,7 @@ class MineManager implements \ArrayAccess, \IteratorAggregate, \Countable {
 
             $this->mines[$offset] = $value;
             if ($this->flag === 1) {
-                $this->store->add($offset, $this->mineToData($value));
+                $this->store->add($offset, $value);
                 $this->saveStore();
             }
         }
