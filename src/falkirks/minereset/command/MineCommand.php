@@ -17,6 +17,7 @@ class MineCommand extends Command implements PluginIdentifiableCommand {
     protected $subCommands;
     public function __construct(MineReset $api){
         parent::__construct("mine", "Mine reset command", "/mine <create|set|list|reset|reset-all|destroy|report> <name> [parameters]");
+        $this->setPermission("mine.command");
         $this->api = $api;
         $this->subCommands = [];
     }
@@ -28,6 +29,9 @@ class MineCommand extends Command implements PluginIdentifiableCommand {
      * @return mixed
      */
     public function execute(CommandSender $sender, string $commandLabel, array $args){
+        if(!$this->testPermission($sender)){
+			return null;
+		}
         if(count($args) > 0 && array_key_exists($args[0], $this->subCommands)){
             return $this->subCommands[array_shift($args)]->execute($sender, $commandLabel, $args);
         }
