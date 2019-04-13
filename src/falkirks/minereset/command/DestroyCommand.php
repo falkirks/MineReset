@@ -32,52 +32,60 @@ class DestroyCommand extends SubCommand{
         $this->senders = [];
     }
 
-    public function doDelete($name, CommandSender $sender){
+    public function doDelete(CommandSender $sender, $name){
         unset($this->getApi()->getMineManager()[$name]);
         unset($this->senders[$sender->getName()]);
         $sender->sendMessage("{$name[0]} has been destroyed.");
     }
 
+    private function formDelete(CommandSender $sender, $name){
+        $form = new class("Are you sure?", "You are about to delete the mine called $name.") extends ModalForm {
+            public function onSubmit(Player $player, $response) : void{
+                if($response){
+                    $this->parent->doDelete($player, $this->name);
+                }
+            }
+        };
+        $form->parent = $this;
+        $form->name = $name;
+        $sender->sendForm($form);
+    }
+
+    private function basicDelete(CommandSender $sender, $name){
+        $str = DestroyCommand::DESTROY_STRINGS[$this->offset];
+        $sender->sendMessage("Run: " . TextFormat::AQUA . "/mine destroy $name $str" . TextFormat::RESET);
+        $sender->sendMessage("To destroy mines faster, you can edit the config file directly.");
+        $this->senders[$sender->getName()] = $str;
+
+        if ($this->offset === count(DestroyCommand::DESTROY_STRINGS) - 1) {
+            $this->offset = -1;
+        }
+
+        $this->offset++;
+    }
+
 
     public function execute(CommandSender $sender, $commandLabel, array $args){
-        if($sender->hasPermission("minereset.command.destroy")) {
-            if (isset($args[0])) {
-                if (isset($this->getApi()->getMineManager()[$args[0]])) {
-                    if($sender instanceof Player && $this->formsSupported()){
-                        $form = new class("Are you sure?", "You are about to delete the mine called {$args[0]}.") extends ModalForm {
-                            public function onSubmit(Player $player, $response) : void{
-                                if($response){
-                                    $this->parent->doDelete($this->name, $player);
-                                }
-                            }
-                        };
-                        $form->parent = $this;
-                        $form->name = $args[0];
-                        $sender->sendForm($form);
-                    }
-                    else if (isset($args[1]) && isset($this->senders[$sender->getName()]) && $this->senders[$sender->getName()] === $args[1]) {
-                        $this->doDelete($args[0], $sender);
-                    } else {
-                        $str = DestroyCommand::DESTROY_STRINGS[$this->offset];
-                        $sender->sendMessage("Run: " . TextFormat::AQUA . "/mine destroy {$args[0]} $str" . TextFormat::RESET);
-                        $sender->sendMessage("To destroy mines faster, you can edit the config file directly.");
-                        $this->senders[$sender->getName()] = $str;
+        if(!$sender->hasPermission("minereset.command.destroy"))
+            return $sender->sendMessage(TextFormat::RED . "You do not have permission to run this command." . TextFormat::RESET);
 
-                        if ($this->offset === count(DestroyCommand::DESTROY_STRINGS) - 1) {
-                            $this->offset = -1;
-                        }
+        if (!isset($args[0]))
+            return $sender->sendMessage("Usage: /mine destroy <name>");
 
-                        $this->offset++;
-                    }
-                } else {
-                    $sender->sendMessage("{$args[0]} is not a valid mine.");
-                }
-            } else {
-                $sender->sendMessage("Usage: /mine destroy <name>");
-            }
+        $name = $args[0];
+
+        if(!isset($this->getApi()->getMineManager()[$name]))
+            return $sender->sendMessage("{$args[0]} is not a valid mine.");
+
+        if($sender instanceof Player && $this->formsSupported()){
+            $this->formDelete($sender, $name);
         }
-        else{
-            $sender->sendMessage(TextFormat::RED . "You do not have permission to run this command." . TextFormat::RESET);
+        else if (isset($args[1]) && isset($this->senders[$sender->getName()]) && $this->senders[$sender->getName()] === $args[1]) {
+            $this->doDelete($sender, $name);
+        } else {
+            $this->basicDelete($sender, $name);
         }
+
+        return true;
     }
 }
