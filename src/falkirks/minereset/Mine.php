@@ -1,7 +1,11 @@
 <?php
 namespace falkirks\minereset;
 
+use falkirks\minereset\exception\InvalidBlockStringException;
+use falkirks\minereset\exception\InvalidStateException;
 use falkirks\minereset\exception\JsonFieldMissingException;
+use falkirks\minereset\exception\MineResetException;
+use falkirks\minereset\exception\WorldNotFoundException;
 use falkirks\minereset\task\ResetTask;
 use falkirks\minereset\util\BlockStringParser;
 use pocketmine\level\format\Chunk;
@@ -101,7 +105,12 @@ class Mine extends Task implements \JsonSerializable {
     }
 
     public function onRun(int $currentTick){
-        $this->reset();
+        try {
+            $this->reset();
+        }
+        catch(MineResetException $e){
+            $this->getApi()->getApi()->getLogger()->debug("Background reset timer raised an exception --> " . $e->getMessage());
+        }
     }
 
     /**
@@ -191,28 +200,35 @@ class Mine extends Task implements \JsonSerializable {
 
     /**
      * @param bool $force NOT TESTED
-     * @return bool
+     * @throws InvalidBlockStringException
+     * @throws InvalidStateException
+     * @throws WorldNotFoundException
      */
     public function reset($force = false){
-        if((!$this->isResetting() || $force) && $this->getLevel() !== null && $this->isValid()){
-            $this->isResetting = true;
-
-            $chunks = [];
-            $chunkClass = Chunk::class;
-            for ($x = $this->getPointA()->getX(); $x-16 <= $this->getPointB()->getX(); $x += 16){
-                for ($z = $this->getPointA()->getZ(); $z-16 <= $this->getPointB()->getZ(); $z += 16) {
-                    $chunk = $this->getLevel()->getChunk($x >> 4, $z >> 4, true);
-
-                    $chunkClass = get_class($chunk);
-                    $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->fastSerialize();
-                }
-            }
-
-            $resetTask = new ResetTask($this->getName(), $chunks, $this->getPointA(), $this->getPointB(), $this->data, $this->getLevel()->getId(), $chunkClass);
-            $this->getApi()->getApi()->getServer()->getAsyncPool()->submitTask($resetTask);
-            return true;
+        if($this->isResetting() && !$force){
+            throw new InvalidStateException();
         }
-        return false;
+        if($this->getLevel() === null){
+            throw new WorldNotFoundException();
+        }
+        if(!$this->isValid()){
+            throw new InvalidBlockStringException();
+        }
+        $this->isResetting = true;
+
+        $chunks = [];
+        $chunkClass = Chunk::class;
+        for ($x = $this->getPointA()->getX(); $x-16 <= $this->getPointB()->getX(); $x += 16){
+            for ($z = $this->getPointA()->getZ(); $z-16 <= $this->getPointB()->getZ(); $z += 16) {
+                $chunk = $this->getLevel()->getChunk($x >> 4, $z >> 4, true);
+
+                $chunkClass = get_class($chunk);
+                $chunks[Level::chunkHash($x >> 4, $z >> 4)] = $chunk->fastSerialize();
+            }
+        }
+
+        $resetTask = new ResetTask($this->getName(), $chunks, $this->getPointA(), $this->getPointB(), $this->data, $this->getLevel()->getId(), $chunkClass);
+        $this->getApi()->getApi()->getServer()->getAsyncPool()->submitTask($resetTask);
     }
 
     /**

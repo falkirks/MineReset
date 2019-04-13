@@ -2,7 +2,6 @@
 namespace falkirks\minereset\command;
 
 
-use falkirks\minereset\Mine;
 use falkirks\minereset\MineReset;
 use Frago9876543210\EasyForms\forms\ModalForm;
 use pocketmine\command\CommandSender;

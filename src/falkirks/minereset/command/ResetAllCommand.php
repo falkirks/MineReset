@@ -2,6 +2,7 @@
 namespace falkirks\minereset\command;
 
 
+use falkirks\minereset\exception\MineResetException;
 use falkirks\minereset\Mine;
 use pocketmine\command\CommandSender;
 use pocketmine\utils\TextFormat;
@@ -12,10 +13,14 @@ class ResetAllCommand extends SubCommand{
             $success = 0;
             foreach ($this->getApi()->getMineManager() as $mine) {
                 if ($mine instanceof Mine) {
-                    if ($mine->reset()) { // Only reset if valid
+                    try{
+                        $mine->reset();
                         $success++;
                         $this->getApi()->getResetProgressManager()->addObserver($mine->getName(), $sender);
+                    } catch (MineResetException $exception){
+                        $sender->sendMessage(TextFormat::RED . "Error raised for {$mine->getName()}, you can reset this mine directly for more info." . TextFormat::RESET);
                     }
+
                 }
             }
             $count = count($this->getApi()->getMineManager());

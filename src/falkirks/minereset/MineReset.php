@@ -5,6 +5,7 @@ namespace falkirks\minereset;
 use falkirks\minereset\command\AboutCommand;
 use falkirks\minereset\command\CreateCommand;
 use falkirks\minereset\command\DestroyCommand;
+use falkirks\minereset\command\EditCommand;
 use falkirks\minereset\command\ListCommand;
 use falkirks\minereset\command\MineCommand;
 use falkirks\minereset\command\ReportCommand;
@@ -76,6 +77,7 @@ class MineReset extends PluginBase{
         $this->mainCommand->registerSubCommand("destroy", new DestroyCommand($this), ['d']);
         $this->mainCommand->registerSubCommand("reset", new ResetCommand($this), ['r']);
         $this->mainCommand->registerSubCommand("reset-all", new ResetAllCommand($this), ['ra']);
+        $this->mainCommand->registerSubCommand("edit", new EditCommand($this), ['e']);
 
         if(!self::supportsChunkSetting()){
             $this->getLogger()->warning("Your server does not support setting chunks without unloading them. This will cause tiles and entities to be lost when resetting mines. Upgrade to a newer pmmp to resolve this.");
