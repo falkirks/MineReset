@@ -115,7 +115,7 @@ class MineCreationSession{
             $mine = new Mine($owner,
                 new Vector3(min($this->pointA->getFloorX(), $this->pointB->getFloorX()), min($this->pointA->getFloorY(), $this->pointB->getFloorY()), min($this->pointA->getFloorZ(), $this->pointB->getFloorZ())),
                 new Vector3(max($this->pointA->getFloorX(), $this->pointB->getFloorX()), max($this->pointA->getFloorY(), $this->pointB->getFloorY()), max($this->pointA->getFloorZ(), $this->pointB->getFloorZ())),
-                $this->level->getName(),
+                $this->level->getFolderName(),
                 $this->name);
             $owner[$this->name] = $mine;
             return $mine;
