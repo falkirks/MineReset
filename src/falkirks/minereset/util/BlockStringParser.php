@@ -18,11 +18,10 @@ class BlockStringParser
 	private static array $blockMap = [];
 
 	private static function ensureMap(): void {
-		if (!is_array(self::$blockMap)) {
+		if (empty(self::$blockMap)) {
 			self::$blockMap = (new ReflectionClass(BlockLegacyIds::class))->getConstants();
 		}
 	}
-
 
 	public static function isValid(string $str): bool {
 		self::ensureMap();
@@ -35,7 +34,7 @@ class BlockStringParser
 			return is_numeric($arr[0]) || isset(self::$blockMap[strtoupper($arr[0])]);
 		}
 
-		return false;
+		return isset(self::$blockMap[strtoupper($str)]);
 
 	}
 

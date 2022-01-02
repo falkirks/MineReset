@@ -4,6 +4,7 @@ namespace falkirks\minereset\task;
 
 use falkirks\minereset\MineReset;
 use falkirks\minereset\util\BlockStringParser;
+use pocketmine\block\Block;
 use pocketmine\math\Vector3;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
@@ -119,7 +120,7 @@ class ResetTask extends AsyncTask
 					$a = rand(0, end($sum));
 					for ($l = 0; $l < $sumCount; $l++) {
 						if ($a <= $sum[$l]) {
-							$currentSubChunk->setFullBlock($x & 0x0f, $y & 0x0f, $z & 0x0f, $id[$l][0] & 0xff);
+							$currentSubChunk->setFullBlock($x & 0x0f, $y & 0x0f, $z & 0x0f, $id[$l][0] << Block::INTERNAL_METADATA_BITS | $id[$l][1] & 0xff);
 							$currentBlocks++;
 							if ($lastUpdate + $interval <= $currentBlocks) {
 								if (method_exists($this, 'publishProgress')) {

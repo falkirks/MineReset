@@ -35,9 +35,7 @@ class SetCommand extends SubCommand
 		$save = [];
 
 		//FIXME Allows bad ordering by treating every input as block string
-		if (!array_reduce($sets, function ($carry, $curr) {
-			return $carry && BlockStringParser::isValid($curr);
-		}, true)) {
+		if (!array_reduce($sets, fn($carry, $curr) => $carry && BlockStringParser::isValid($curr), true)) {
 			$sender->sendMessage(TextFormat::RED . "Part of your format is not a number." . TextFormat::RESET);
 			return false;
 		}
