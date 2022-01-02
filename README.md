@@ -1,6 +1,6 @@
 MineReset
 =========
-MineReset is a fancy tool which allows you to create resettable mines the right way. It has been entirely rewritten in version 3.0.
+MineReset is a fancy tool which allows you to create resettable mines the right way. It has been entirely rewritten in version 4.0.0
 
 
 ## Commands
@@ -45,4 +45,4 @@ This command will list out all existing mines.
 ### /mine about
 **minereset.command.about**
 
-This command will display a little info blurb downloaded from the web. 
+This command will display a little info about the plugin author. 
