@@ -1,31 +1,39 @@
 name: MineReset
 main: falkirks\minereset\MineReset
-version: 3.3.0
-author: Falk
-api: [3.0.0, 4.0.0]
+version: 4.0.0-beta
+author: Falk & Octopush
+api: 4.0.0
 load: POSTWORLD
-softdepend: [SimpleWarp, EasyForms]
+softdepend: [ SimpleWarp ]
+
 permissions:
- minereset:
-  default: op
-  children:
-   minereset.command:
+  minereset:
+    default: op
+    description: Main permission for mine reset
+  minereset.command:
     default: op
     description: Use MineReset commands
-    children:
-      minereset.command.about:
-        description: Read the about text
-      minereset.command.edit:
-        description: Use the editor form
-      minereset.command.report:
-        description: Generate github issues
-      minereset.command.create:
-        description: Add new Mines
-      minereset.command.set:
-        description: Set existing mines
-      minereset.command.reset:
-        description: Reset mines
-      minereset.command.destroy:
-        description: Remove mines
-      minereset.command.resetall:
-        description: Reset all mines
+  minereset.command.about:
+    description: Read the about text
+    default: true
+  minereset.command.edit:
+    description: Use the editor form
+    default: op
+  minereset.command.report:
+    description: Generate github issues
+    default: op
+  minereset.command.create:
+    description: Add new Mines
+    default: op
+  minereset.command.set:
+    description: Set existing mines
+    default: op
+  minereset.command.reset:
+    description: Reset mines
+    default: op
+  minereset.command.destroy:
+    description: Remove mines
+    default: op
+  minereset.command.resetall:
+    description: Reset all mines
+    default: op

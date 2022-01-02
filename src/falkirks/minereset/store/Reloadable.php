@@ -3,5 +3,5 @@ namespace falkirks\minereset\store;
 
 
 interface Reloadable{
-    public function reload();
+    public function reload(): void;
 }
