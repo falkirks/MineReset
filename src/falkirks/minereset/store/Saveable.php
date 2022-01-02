@@ -9,6 +9,7 @@
 namespace falkirks\minereset\store;
 
 
-interface Saveable{
-    public function save();
+interface Saveable
+{
+	public function save(): void;
 }

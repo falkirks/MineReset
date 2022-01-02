@@ -1,6 +1,6 @@
 <?php
-namespace falkirks\minereset;
 
+namespace falkirks\minereset;
 
 use falkirks\minereset\command\AboutCommand;
 use falkirks\minereset\command\CreateCommand;
@@ -15,13 +15,11 @@ use falkirks\minereset\command\SetCommand;
 use falkirks\minereset\listener\CreationListener;
 use falkirks\minereset\listener\RegionBlockerListener;
 use falkirks\minereset\store\ConfigStore;
-use falkirks\minereset\store\EntityStore;
-use falkirks\minereset\store\YAMLStore;
-use falkirks\minereset\task\ScheduledResetTaskPool;
 use falkirks\minereset\util\DebugDumpFactory;
-use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
+use pocketmine\world\World;
+use ReflectionClass;
 
 
 /**
@@ -30,126 +28,118 @@ use pocketmine\utils\Config;
  * Class MineReset
  * @package falkirks\minereset
  */
-class MineReset extends PluginBase{
+class MineReset extends PluginBase
+{
 
-    /** @var  MineManager */
-    private $mineManager;
-    /** @var  ResetProgressManager */
-    private $resetProgressManager;
-    /** @var  RegionBlockerListener */
-    private $regionBlockerListener;
-    /** @var  MineCommand */
-    private $mainCommand;
-    /** @var DebugDumpFactory */
-    private $debugDumpFactory;
+	/** @var  MineManager */
+	private MineManager $mineManager;
+	/** @var  ResetProgressManager */
+	private ResetProgressManager $resetProgressManager;
+	/** @var  RegionBlockerListener */
+	private RegionBlockerListener $regionBlockerListener;
+	/** @var  MineCommand */
+	private MineCommand $mainCommand;
+	/** @var DebugDumpFactory */
+	private DebugDumpFactory $debugDumpFactory;
+	/** @var  bool */
+	private static ?bool $supportsChunkSetting = null;
+	/** @var  CreationListener */
+	private CreationListener $creationListener;
 
-    /** @var  bool */
-    private static $supportsChunkSetting = null;
+	final public function onEnable(): void {
+		self::detectChunkSetting();
 
-    /** @var  CreationListener */
-    private $creationListener;
+		@mkdir($this->getDataFolder());
 
-    public function onEnable(){
-        self::detectChunkSetting();
+		$this->debugDumpFactory = new DebugDumpFactory($this);
 
-        @mkdir($this->getDataFolder());
+		$this->mineManager = new MineManager($this, new ConfigStore(new Config($this->getDataFolder() . "mines.json", Config::JSON, [])));
 
-        $this->debugDumpFactory = new DebugDumpFactory($this);
+		$this->resetProgressManager = new ResetProgressManager($this);
 
-        $this->mineManager = new MineManager($this, new ConfigStore(new Config($this->getDataFolder() . "mines.json", Config::JSON, [])));
+		$this->regionBlockerListener = new RegionBlockerListener($this);
+		$this->getServer()->getPluginManager()->registerEvents($this->regionBlockerListener, $this);
 
-        $this->resetProgressManager = new ResetProgressManager($this);
+		$this->creationListener = new CreationListener($this);
+		$this->getServer()->getPluginManager()->registerEvents($this->creationListener, $this);
 
-        $this->regionBlockerListener = new RegionBlockerListener($this);
-        $this->getServer()->getPluginManager()->registerEvents($this->regionBlockerListener, $this);
+		$this->mainCommand = new MineCommand($this);
+		$this->getServer()->getCommandMap()->register("minereset", $this->mainCommand);
 
-        $this->creationListener = new CreationListener($this);
-        $this->getServer()->getPluginManager()->registerEvents($this->creationListener, $this);
+		$this->mainCommand->registerSubCommand("about", new AboutCommand($this), ['a']);
+		$this->mainCommand->registerSubCommand("report", new ReportCommand($this), []);
+		$this->mainCommand->registerSubCommand("list", new ListCommand($this), ['l']);
+		$this->mainCommand->registerSubCommand("create", new CreateCommand($this), ['c']);
+		$this->mainCommand->registerSubCommand("set", new SetCommand($this), ['s']);
+		$this->mainCommand->registerSubCommand("destroy", new DestroyCommand($this), ['d']);
+		$this->mainCommand->registerSubCommand("reset", new ResetCommand($this), ['r']);
+		$this->mainCommand->registerSubCommand("reset-all", new ResetAllCommand($this), ['ra']);
+		$this->mainCommand->registerSubCommand("edit", new EditCommand($this), ['e']);
 
-        $this->mainCommand = new MineCommand($this);
-        $this->getServer()->getCommandMap()->register("minereset", $this->mainCommand);
+		if (!self::supportsChunkSetting()) {
+			$this->getLogger()->warning("Your server does not support setting chunks without unloading them. This will cause tiles and entities to be lost when resetting mines. Upgrade to a newer pmmp to resolve this.");
+		}
 
-        $this->mainCommand->registerSubCommand("about", new AboutCommand($this), ['a']);
-        $this->mainCommand->registerSubCommand("report", new ReportCommand($this), []);
-        $this->mainCommand->registerSubCommand("list", new ListCommand($this), ['l']);
-        $this->mainCommand->registerSubCommand("create", new CreateCommand($this), ['c']);
-        $this->mainCommand->registerSubCommand("set", new SetCommand($this), ['s']);
-        $this->mainCommand->registerSubCommand("destroy", new DestroyCommand($this), ['d']);
-        $this->mainCommand->registerSubCommand("reset", new ResetCommand($this), ['r']);
-        $this->mainCommand->registerSubCommand("reset-all", new ResetAllCommand($this), ['ra']);
-        $this->mainCommand->registerSubCommand("edit", new EditCommand($this), ['e']);
+	}
 
-        if(!self::supportsChunkSetting()){
-            $this->getLogger()->warning("Your server does not support setting chunks without unloading them. This will cause tiles and entities to be lost when resetting mines. Upgrade to a newer pmmp to resolve this.");
-        }
+	final public function onDisable(): void {
+		$this->mineManager->saveAll();
+	}
 
-    }
+	/**
+	 * @return MineManager
+	 */
+	public function getMineManager(): MineManager {
+		return $this->mineManager;
+	}
 
-    public function onDisable(){
-        $this->mineManager->saveAll();
-    }
+	/**
+	 * @return ResetProgressManager
+	 */
+	public function getResetProgressManager(): ResetProgressManager {
+		return $this->resetProgressManager;
+	}
 
-    /**
-     * @return MineManager
-     */
-    public function getMineManager(): MineManager{
-        return $this->mineManager;
-    }
+	/**
+	 * @return MineCommand
+	 */
+	public function getMainCommand(): MineCommand {
+		return $this->mainCommand;
+	}
 
-    /**
-     * @return ResetProgressManager
-     */
-    public function getResetProgressManager(): ResetProgressManager{
-        return $this->resetProgressManager;
-    }
+	/**
+	 * @return CreationListener
+	 */
+	public function getCreationListener(): CreationListener {
+		return $this->creationListener;
+	}
 
-    /**
-     * @return MineCommand
-     */
-    public function getMainCommand(): MineCommand{
-        return $this->mainCommand;
-    }
+	/**
+	 * @return RegionBlockerListener
+	 */
+	public function getRegionBlockerListener(): RegionBlockerListener {
+		return $this->regionBlockerListener;
+	}
 
-    /**
-     * @return CreationListener
-     */
-    public function getCreationListener(): CreationListener{
-        return $this->creationListener;
-    }
-
-    /**
-     * @return RegionBlockerListener
-     */
-    public function getRegionBlockerListener(): RegionBlockerListener{
-        return $this->regionBlockerListener;
-    }
-
-    /**
-     * @return DebugDumpFactory
-     */
-    public function getDebugDumpFactory(): DebugDumpFactory{
-        return $this->debugDumpFactory;
-    }
-
+	/**
+	 * @return DebugDumpFactory
+	 */
+	public function getDebugDumpFactory(): DebugDumpFactory {
+		return $this->debugDumpFactory;
+	}
 
 
+	public static function supportsChunkSetting(): bool {
+		return static::$supportsChunkSetting;
+	}
 
-    public static function supportsChunkSetting(): bool {
-        return static::$supportsChunkSetting;
-    }
-
-    private static function detectChunkSetting(){
-        if(self::$supportsChunkSetting === null) {
-            $class = new \ReflectionClass(Level::class);
-            $func = $class->getMethod("setChunk");
-            $filename = $func->getFileName();
-            $start_line = $func->getStartLine() - 1;
-            $end_line = $func->getEndLine();
-            $length = $end_line - $start_line;
-
-            $source = file($filename);
-            $body = implode("", array_slice($source, $start_line, $length));
-            self::$supportsChunkSetting = strpos($body, 'removeEntity') !== false;
-        }
-    }
+	/**
+	 * @return void
+	 */
+	private static function detectChunkSetting(): void {
+		if (self::$supportsChunkSetting === null) {
+			$class = new ReflectionClass(World::class);
+			self::$supportsChunkSetting = $class->getMethod("setChunk") && $class->getMethod("removeEntity");
+		}
+	}
 }
