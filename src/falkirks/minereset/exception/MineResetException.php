@@ -3,7 +3,9 @@
 namespace falkirks\minereset\exception;
 
 
-class MineResetException extends \Exception
+use Exception;
+
+class MineResetException extends Exception
 {
 
 }

@@ -3,23 +3,35 @@
 namespace falkirks\minereset\util;
 
 
-use falkirks\minereset\Mine;
 use falkirks\minereset\MineReset;
 
-class DebugDumpFactory{
+class DebugDumpFactory
+{
     /** @var  MineReset */
-    private $api;
+    private MineReset $api;
 
 
     /**
      * DebugDump constructor.
      */
-    public function __construct(MineReset $mineReset){
+    public function __construct(MineReset $mineReset)
+    {
         $this->api = $mineReset;
     }
 
+    /**
+     * @throws \JsonException
+     */
+    public function __toString()
+    {
+        return $this->generate();
+    }
 
-    public function generate(): string {
+    /**
+     * @throws \JsonException
+     */
+    public function generate(): string
+    {
         return implode("\n", [
             "SERVER VERSION: " . $this->getApi()->getServer()->getPocketMineVersion(),
             "API: " . $this->getApi()->getServer()->getApiVersion(),
@@ -28,19 +40,15 @@ class DebugDumpFactory{
             "MineReset Version: " . $this->getApi()->getDescription()->getVersion(),
             "PLUGINS: " . implode(",", array_keys($this->getApi()->getServer()->getPluginManager()->getPlugins())),
             "storage-mode: " . $this->getApi()->getMineManager()->getFlag(),
-            json_encode($this->getApi()->getMineManager()->getMines(), JSON_PRETTY_PRINT)
+            json_encode($this->getApi()->getMineManager()->getMines(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)
         ]);
-    }
-
-
-    function __toString(){
-        return $this->generate();
     }
 
     /**
      * @return MineReset
      */
-    public function getApi(): MineReset{
+    public function getApi(): MineReset
+    {
         return $this->api;
     }
 }
