@@ -1,6 +1,6 @@
 <?php
-namespace falkirks\minereset\listener;
 
+namespace falkirks\minereset\listener;
 
 use falkirks\minereset\Mine;
 use falkirks\minereset\MineReset;
@@ -8,40 +8,32 @@ use falkirks\simplewarp\SimpleWarp;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Listener;
-use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\level\Position;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\Position;
 
-class RegionBlockerListener implements Listener {
+class RegionBlockerListener implements Listener
+{
     /** @var  MineReset */
-    private $api;
+    private MineReset $api;
 
     /**
      * RegionBlockerListener constructor.
+     *
      * @param MineReset $api
      */
-    public function __construct(MineReset $api){
+    public function __construct(MineReset $api)
+    {
         $this->api = $api;
     }
 
-    public function teleportPlayer(Player $player, Mine $mine){
-
-        $swarp = $this->getApi()->getServer()->getPluginManager()->getPlugin('SimpleWarp');
-        if($mine->hasWarp() && $swarp instanceof SimpleWarp){
-            $swarp->getApi()->warpPlayerTo($player, $mine->getWarpName());
-        } else {
-            $player->teleport($player->getLevel()->getSafeSpawn($player->getPosition()));
-        }
-    }
-
-
-    public function clearMine(string $mineName){
+    public function clearMine(string $mineName): void
+    {
         /** @var Mine $mine */
         $mine = $this->getApi()->getMineManager()[$mineName];
-        if($mine !== null){
-            foreach ($this->getApi()->getServer()->getOnlinePlayers() as $player){
-                if($mine->isPointInside($player->getPosition())){
+        if ($mine !== null) {
+            foreach ($this->getApi()->getServer()->getOnlinePlayers() as $player) {
+                if ($mine->isPointInside($player->getPosition())) {
                     $this->teleportPlayer($player, $mine);
                     $player->sendMessage("You have teleported to escape a resetting mine.");
                 }
@@ -50,36 +42,45 @@ class RegionBlockerListener implements Listener {
     }
 
     /**
-     * @priority HIGH
-     *
-     * @param BlockPlaceEvent $event
+     * @return MineReset
      */
-    public function onBlockPlace(BlockPlaceEvent $event){
+    public function getApi(): MineReset
+    {
+        return $this->api;
+    }
 
-        $mine = $this->getResettingMineAtPosition($event->getBlock());
-        if($mine != null){
-            $event->getPlayer()->sendMessage(TextFormat::RED . "A mine is currently resetting in this area. You may not place blocks." . TextFormat::RESET);
-            $event->setCancelled();
+
+    /** @noinspection NotOptimalIfConditionsInspection */
+    /** @noinspection PhpUndefinedClassInspection */
+    public function teleportPlayer(Player $player, Mine $mine): void
+    {
+        $swarp = $this->getApi()->getServer()->getPluginManager()->getPlugin('SimpleWarp');
+        if ($mine->hasWarp() && $swarp instanceof SimpleWarp) {
+            $swarp->getApi()->warpPlayerTo($player, $mine->getWarpName());
+        } else {
+            $player->teleport($player->getWorld()->getSafeSpawn($player->getPosition()));
         }
     }
 
     /**
      * @priority HIGH
      *
-     * @param BlockBreakEvent $event
+     * @param BlockPlaceEvent $event
      */
-    public function onBlockDestroy(BlockBreakEvent $event){
+    public function onBlockPlace(BlockPlaceEvent $event): void
+    {
 
-        $mine = $this->getResettingMineAtPosition($event->getBlock());
-        if($mine != null){
-            $event->getPlayer()->sendMessage(TextFormat::RED . "A mine is currently resetting in this area. You may not break blocks." . TextFormat::RESET);
-            $event->setCancelled();
+        $mine = $this->getResettingMineAtPosition($event->getBlock()->getPosition());
+        if ($mine !== null) {
+            $event->getPlayer()->sendMessage(TextFormat::RED . "A mine is currently resetting in this area. You may not place blocks." . TextFormat::RESET);
+            $event->cancel();
         }
     }
 
-    private function getResettingMineAtPosition(Position $position){
+    private function getResettingMineAtPosition(Position $position)
+    {
         foreach ($this->getApi()->getMineManager() as $mine) {
-            if($mine->isResetting() && $mine->isPointInside($position)){
+            if ($mine->isResetting() && $mine->isPointInside($position)) {
                 return $mine;
             }
         }
@@ -87,10 +88,18 @@ class RegionBlockerListener implements Listener {
     }
 
     /**
-     * @return MineReset
+     * @priority HIGH
+     *
+     * @param BlockBreakEvent $event
      */
-    public function getApi(): MineReset{
-        return $this->api;
+    public function onBlockDestroy(BlockBreakEvent $event): void
+    {
+
+        $mine = $this->getResettingMineAtPosition($event->getBlock()->getPosition());
+        if ($mine !== null) {
+            $event->getPlayer()->sendMessage(TextFormat::RED . "A mine is currently resetting in this area. You may not break blocks." . TextFormat::RESET);
+            $event->cancel();
+        }
     }
 
 

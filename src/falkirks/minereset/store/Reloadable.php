@@ -1,7 +1,9 @@
 <?php
+
 namespace falkirks\minereset\store;
 
 
-interface Reloadable{
+interface Reloadable
+{
     public function reload();
 }

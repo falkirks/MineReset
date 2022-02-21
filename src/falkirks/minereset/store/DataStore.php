@@ -1,4 +1,5 @@
 <?php
+
 namespace falkirks\minereset\store;
 
 /**
@@ -9,31 +10,34 @@ namespace falkirks\minereset\store;
  * as Mine Reset.
  *
  * Interface DataStore
+ *
  * @package falkirks\minereset\store
  */
-interface DataStore {
-    public function addAll($mines);
-    public function removeAll($mines);
-    public function exists($name) : bool ;
+interface DataStore
+{
+    public function addAll($mines): void;
+
+    public function removeAll($mines): void;
+
+    public function exists($name): bool;
+
     /**
      * This method takes a $name string and a $warp array and
      * returns the previous value that occupied $name or null.
-     * @param $name
-     * @param $mine
-     * @return mixed
      */
     public function add($name, $mine);
-    /**
-     * @param $name
-     * @return mixed
-     */
+
     public function get($name);
+
     public function remove($name);
-    public function clear();
+
+    public function clear(): void;
+
     /**
      * Returns something which can be used to iterate
      * over the store.
+     *
      * @return mixed
      */
-    public function getIterator();
+    public function getIterator(): mixed;
 }

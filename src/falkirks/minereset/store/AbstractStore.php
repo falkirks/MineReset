@@ -1,4 +1,5 @@
 <?php
+
 namespace falkirks\minereset\store;
 
 /**
@@ -6,20 +7,27 @@ namespace falkirks\minereset\store;
  * as Mine Reset.
  *
  * Interface AbstractStore
+ *
  * @package falkirks\minereset\store
  */
-abstract class AbstractStore implements DataStore{
-    public function addAll($mines){
-        foreach($mines as $name => $mine){
+abstract class AbstractStore implements DataStore
+{
+    public function addAll($mines): void
+    {
+        foreach ($mines as $name => $mine) {
             $this->add($name, $mine);
         }
     }
-    public function removeAll($mines){
-        foreach($mines as $mine){
+
+    public function removeAll($mines): void
+    {
+        foreach ($mines as $mine) {
             $this->remove($mine);
         }
     }
-    public function exists($name): bool{
+
+    public function exists($name): bool
+    {
         return $this->get($name) !== null;
     }
 }
